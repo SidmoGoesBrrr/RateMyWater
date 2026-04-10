@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
-    const { name, location, type, imageUrl, description, uploadedBy } = body;
+    const { name, location, type, imageUrl, description, uploadedBy, coordinates } = body;
 
     if (!name || !location || !type || !imageUrl) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       imageUrl,
       description: description?.trim(),
       uploadedBy: uploadedBy?.trim() || "Anonymous",
+      ...(coordinates?.lat && coordinates?.lng ? { coordinates } : {}),
     });
 
     return NextResponse.json(waterBody, { status: 201 });
