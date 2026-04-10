@@ -8,17 +8,10 @@ import {
   Trophy, Upload, MapPin, Calendar, ChevronLeft,
   MessageSquare, CheckCircle, Loader2, Users
 } from "lucide-react";
-import { FloatingNav } from "@/components/ui/floating-nav";
 import { MovingBorderButton } from "@/components/ui/moving-border";
 import { WaterRatingPicker, RatingBadge, ScoreDisplay } from "@/components/WaterRatingPicker";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { name: "Home", link: "/" },
-  { name: "Leaderboard", link: "/leaderboard", icon: <Trophy className="h-3.5 w-3.5" /> },
-  { name: "Submit Water", link: "/upload", icon: <Upload className="h-3.5 w-3.5" /> },
-];
 
 interface RatingEntry {
   rating: WaterRating;
@@ -213,7 +206,6 @@ export default function WaterDetailPage({
 
   return (
     <main className="min-h-screen bg-[#060d1f] text-white">
-      <FloatingNav navItems={NAV_ITEMS} />
 
       {/* Hero image */}
       <div className="relative h-[50vh] min-h-[320px] w-full">

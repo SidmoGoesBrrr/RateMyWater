@@ -4,18 +4,11 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Trophy, Upload, Droplets, MapPin, Filter, ArrowRight, TrendingUp } from "lucide-react";
-import { FloatingNav } from "@/components/ui/floating-nav";
 import { MovingBorderButton } from "@/components/ui/moving-border";
 import NumberTicker from "@/components/ui/number-ticker";
 import { type WaterCardData } from "@/components/WaterCard";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS = [
-  { name: "Home", link: "/" },
-  { name: "Leaderboard", link: "/leaderboard", icon: <Trophy className="h-3.5 w-3.5" /> },
-  { name: "Submit Water", link: "/upload", icon: <Upload className="h-3.5 w-3.5" /> },
-];
 
 const TYPE_OPTIONS = [
   { value: "all", label: "All Types", emoji: "💧" },
@@ -220,8 +213,7 @@ export default function LeaderboardPage() {
   const topThree = waters.slice(0, 3).filter((w) => w.totalRatings > 0);
 
   return (
-    <main className="min-h-screen bg-[#060d1f] text-white">
-      <FloatingNav navItems={NAV_ITEMS} />
+    <main className="min-h-screen bg-[#060d1f] text-white pt-14 md:pt-14">
 
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">

@@ -23,6 +23,7 @@ export interface IWaterBody extends Document {
   averageScore: number;
   totalRatings: number;
   topRating?: WaterRating;
+  coordinates?: { lat: number; lng: number };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +54,10 @@ const WaterBodySchema = new Schema<IWaterBody>(
     averageScore: { type: Number, default: 0 },
     totalRatings: { type: Number, default: 0 },
     topRating: { type: String, enum: Object.keys(RATING_META) },
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
   },
   { timestamps: true }
 );
