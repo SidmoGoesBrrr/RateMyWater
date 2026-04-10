@@ -1,32 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "RateMyWater",
-  description: "Rate and review water quality",
+  title: "RateMyWater — Rate the World's Water",
+  description:
+    "From dive-in-with-mouth-open perfection to biohazard speedruns — the community rates water bodies worldwide.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased bg-[#060d1f] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
         {children}
       </body>
     </html>
