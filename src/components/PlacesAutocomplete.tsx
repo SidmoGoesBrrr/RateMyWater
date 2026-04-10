@@ -1,10 +1,9 @@
 "use client";
 import { useRef, useState } from "react";
-import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { Autocomplete } from "@react-google-maps/api";
 import { MapPin, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const LIBRARIES: ("places")[] = ["places"];
+import { useGoogleMaps } from "@/lib/google-maps";
 
 interface Props {
   value: string;
@@ -22,7 +21,7 @@ export function PlacesAutocomplete({
   className,
 }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
-  const { isLoaded } = useJsApiLoader({ googleMapsApiKey: apiKey, libraries: LIBRARIES });
+  const { isLoaded } = useGoogleMaps();
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [focused, setFocused] = useState(false);
 
@@ -72,7 +71,6 @@ export function PlacesAutocomplete({
       <Autocomplete
         onLoad={(ac) => (autocompleteRef.current = ac)}
         onPlaceChanged={handlePlaceChanged}
-        types={["establishment", "natural_feature", "geocode"]}
       >
         <input
           type="text"

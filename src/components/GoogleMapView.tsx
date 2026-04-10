@@ -2,10 +2,10 @@
 import { useCallback, useRef, useState } from "react";
 import {
   GoogleMap,
-  useJsApiLoader,
   OverlayView,
   InfoWindow,
 } from "@react-google-maps/api";
+import { useGoogleMaps } from "@/lib/google-maps";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -104,8 +104,6 @@ function WaterPin({ water, onClick, isSelected }: { water: MapWaterEntry; onClic
   );
 }
 
-const LIBRARIES: ("places" | "geometry")[] = ["places", "geometry"];
-
 interface Props {
   waters: MapWaterEntry[];
   center?: { lat: number; lng: number };
@@ -124,10 +122,7 @@ export function GoogleMapView({
   onMiniMarkerChange,
 }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: apiKey,
-    libraries: LIBRARIES,
-  });
+  const { isLoaded, loadError } = useGoogleMaps();
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const [selected, setSelected] = useState<MapWaterEntry | null>(null);
