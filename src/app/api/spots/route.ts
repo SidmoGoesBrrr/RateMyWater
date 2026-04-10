@@ -30,10 +30,10 @@ export async function GET(req: Request) {
       100,
     );
     const sortParam = url.searchParams.get("sort");
-    const sort =
+    const sort: Record<string, 1 | -1> =
       sortParam === "top"
-        ? { "stats.avgOverall": -1 as const, "stats.ratingCount": -1 as const }
-        : { createdAt: -1 as const };
+        ? { "stats.avgOverall": -1, "stats.ratingCount": -1 }
+        : { createdAt: -1 };
 
     // Gotcha #7: .lean() returns plain objects so they serialize cleanly across
     // the Server → Client boundary and skip Mongoose hydration overhead.
