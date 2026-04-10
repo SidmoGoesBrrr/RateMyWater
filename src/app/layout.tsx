@@ -13,7 +13,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-[#060d1f] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <body className="antialiased bg-[#082232] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
         <Navbar />
         {children}
       </body>

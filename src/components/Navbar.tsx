@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Home, Map, Trophy, MessageSquare, Search, Plus, Droplets } from "lucide-react";
+import { Home, Map, Trophy, MessageSquare, Search, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -19,15 +19,17 @@ export function Navbar() {
   return (
     <>
       {/* ── Desktop top bar ──────────────────────────────────── */}
-      <header className="hidden md:flex fixed top-0 inset-x-0 z-50 h-14 items-center px-6 border-b border-white/5 bg-[#060d1f]/90 backdrop-blur-xl">
-        <Link href="/" className="flex items-center gap-2 mr-10 flex-shrink-0">
-          <Droplets className="h-5 w-5 text-cyan-400" />
-          <span className="text-sm font-black tracking-tight text-white">
+      <header className="hidden md:flex fixed top-0 inset-x-0 z-50 h-16 items-center px-8 border-b border-white/6 bg-[#082232]/92 backdrop-blur-xl">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 mr-10 shrink-0 group">
+          <span className="text-xl">💧</span>
+          <span className="text-base font-black tracking-tight text-white group-hover:text-cyan-100 transition-colors">
             Rate<span className="text-cyan-400">My</span>Water
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1">
+        {/* Nav items */}
+        <nav className="flex items-center gap-2">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -35,18 +37,18 @@ export function Navbar() {
                 key={href}
                 href={href}
                 className={cn(
-                  "relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                  "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200",
                   active
-                    ? "text-cyan-400 bg-cyan-500/10"
-                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    ? "text-cyan-100 bg-cyan-500/18 border border-cyan-400/30 shadow-sm shadow-cyan-500/10"
+                    : "text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12"
                 )}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className={cn("h-4 w-4 shrink-0", active ? "text-cyan-400" : "text-white/50")} />
                 {label}
                 {active && (
                   <motion.div
                     layoutId="desktop-active"
-                    className="absolute inset-0 rounded-lg bg-cyan-500/10 border border-cyan-500/20"
+                    className="absolute inset-0 rounded-xl bg-cyan-500/12 border border-cyan-400/25"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -54,25 +56,10 @@ export function Navbar() {
             );
           })}
         </nav>
-
-        <div className="ml-auto">
-          <Link
-            href="/upload"
-            className={cn(
-              "flex items-center gap-2 rounded-lg px-4 py-1.5 text-xs font-semibold transition-all",
-              pathname === "/upload"
-                ? "bg-cyan-500 text-black"
-                : "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25"
-            )}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Submit Water
-          </Link>
-        </div>
       </header>
 
       {/* ── Mobile bottom bar ────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-white/5 bg-[#060d1f]/95 backdrop-blur-xl">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-white/6 bg-[#082232]/96 backdrop-blur-xl">
         <div className="flex items-center justify-around px-2 py-2 pb-safe">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -80,25 +67,25 @@ export function Navbar() {
               <Link
                 key={href}
                 href={href}
-                className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors"
+                className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all"
               >
                 {active && (
                   <motion.div
                     layoutId="mobile-active"
-                    className="absolute inset-0 rounded-xl bg-cyan-500/10"
+                    className="absolute inset-0 rounded-xl bg-cyan-500/15 border border-cyan-500/20"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
                 <Icon
                   className={cn(
                     "h-5 w-5 relative z-10 transition-colors",
-                    active ? "text-cyan-400" : "text-zinc-500"
+                    active ? "text-cyan-400" : "text-white/40"
                   )}
                 />
                 <span
                   className={cn(
-                    "text-[10px] font-medium relative z-10 transition-colors",
-                    active ? "text-cyan-400" : "text-zinc-600"
+                    "text-[10px] font-semibold relative z-10 transition-colors",
+                    active ? "text-cyan-300" : "text-white/40"
                   )}
                 >
                   {label}
@@ -120,20 +107,20 @@ export function Navbar() {
                 "h-8 w-8 rounded-xl flex items-center justify-center transition-all",
                 pathname === "/upload"
                   ? "bg-cyan-500 shadow-lg shadow-cyan-500/30"
-                  : "bg-cyan-500/20 border border-cyan-500/30"
+                  : "bg-cyan-500/25 border border-cyan-500/35"
               )}
             >
               <Plus
                 className={cn(
                   "h-4 w-4",
-                  pathname === "/upload" ? "text-black" : "text-cyan-400"
+                  pathname === "/upload" ? "text-black" : "text-cyan-300"
                 )}
               />
             </div>
             <span
               className={cn(
-                "text-[10px] font-medium transition-colors",
-                pathname === "/upload" ? "text-cyan-400" : "text-zinc-600"
+                "text-[10px] font-semibold transition-colors",
+                pathname === "/upload" ? "text-cyan-400" : "text-white/40"
               )}
             >
               Submit
