@@ -176,6 +176,7 @@ export function GoogleMapView({
   const mapOptions: google.maps.MapOptions = {
     styles: MAP_STYLES,
     disableDefaultUI: true,
+    minZoom: 2,
     zoomControl: mode === "full",
     mapTypeControl: false,
     streetViewControl: false,
@@ -271,7 +272,7 @@ export function GoogleMapView({
             +
           </button>
           <button
-            onClick={() => mapRef.current?.setZoom((mapRef.current.getZoom() ?? 3) - 1)}
+            onClick={() => mapRef.current?.setZoom(Math.max(2, (mapRef.current.getZoom() ?? 3) - 1))}
             className="h-9 w-9 rounded-xl bg-slate-900/90 border border-white/10 flex items-center justify-center text-white text-lg hover:bg-slate-800 transition-colors"
           >
             −
