@@ -55,6 +55,7 @@ function FeedCard({ water }: { water: WaterBody }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       className="rounded-2xl border border-white/8 bg-slate-900/50 overflow-hidden hover:border-white/15 transition-colors"
+      style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
     >
       <Link href={`/water/${water._id}`} className="block">
         {/* Header row: author + timestamp + location */}
@@ -262,10 +263,10 @@ export default function ForumPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#082232] text-white pt-16">
+    <main className="h-screen bg-[#082232] text-white pt-16 overflow-y-auto" style={{ scrollSnapType: "y mandatory", scrollPaddingTop: "80px" }}>
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 md:pb-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6" style={{ scrollSnapAlign: "start" }}>
           <div>
             <h1 className="text-2xl font-black text-white">Feed</h1>
             <p className="text-xs text-zinc-500 mt-0.5">
@@ -333,7 +334,7 @@ export default function ForumPage() {
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-8">
             {items.map((water) => (
               <FeedCard key={water._id} water={water} />
             ))}
