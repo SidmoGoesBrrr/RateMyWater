@@ -62,19 +62,14 @@ export function Navbar() {
                 <Link
                   href={href}
                   className={cn(
-                    "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200",
+                    "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold leading-none transition-all duration-200",
                     active
                       ? "text-sky-100 bg-sky-500/18 border border-sky-400/30 shadow-sm shadow-sky-500/10"
                       : "text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12"
                   )}
                 >
-                  <motion.div
-                    animate={active ? { rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] } : {}}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-sky-400" : "text-white/50")} />
-                  </motion.div>
-                  {label}
+                  <Icon className={cn("h-4 w-4 shrink-0", active ? "text-sky-400" : "text-white/50")} />
+                  <span>{label}</span>
                   {active && (
                     <motion.div
                       layoutId="desktop-active"
@@ -98,7 +93,7 @@ export function Navbar() {
                 <Link
                   href={PROFILE_ITEM.href}
                   className={cn(
-                    "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200",
+                    "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold leading-none transition-all duration-200",
                     pathname.startsWith(PROFILE_ITEM.href)
                       ? "text-sky-100 bg-sky-500/18 border border-sky-400/30 shadow-sm shadow-sky-500/10"
                       : "text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12"
@@ -106,11 +101,11 @@ export function Navbar() {
                 >
                   <PROFILE_ITEM.icon
                     className={cn(
-                      "h-4 w-4",
+                      "h-4 w-4 shrink-0",
                       pathname.startsWith(PROFILE_ITEM.href) ? "text-sky-400" : "text-white/50"
                     )}
                   />
-                  {PROFILE_ITEM.label}
+                  <span>{PROFILE_ITEM.label}</span>
                 </Link>
               </motion.div>
               {/* Sign-out: red/destructive — visually distinct from sign-in */}
@@ -118,10 +113,10 @@ export function Navbar() {
                 href="/auth/logout"
                 whileHover={{ scale: 1.05, boxShadow: "0 0 16px rgba(239,68,68,0.25)" }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-red-300 bg-red-500/10 border border-red-500/25 hover:bg-red-500/18 hover:border-red-400/40 hover:text-red-200 transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold leading-none text-red-300 bg-red-500/10 border border-red-500/25 hover:bg-red-500/18 hover:border-red-400/40 hover:text-red-200 transition-all duration-200"
               >
-                <LogOut className="h-4 w-4 text-red-400" />
-                Sign out
+                <LogOut className="h-4 w-4 shrink-0 text-red-400" />
+                <span>Sign out</span>
               </motion.a>
             </>
           ) : (
@@ -130,15 +125,10 @@ export function Navbar() {
               href="/auth/login"
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(56,189,248,0.3)" }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-sky-100 bg-sky-500/18 border border-sky-400/30 hover:bg-sky-500/25 transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold leading-none text-sky-100 bg-sky-500/18 border border-sky-400/30 hover:bg-sky-500/25 transition-all duration-200"
             >
-              <motion.div
-                animate={{ x: [0, 3, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-              >
-                <LogIn className="h-4 w-4 text-sky-400" />
-              </motion.div>
-              Sign in
+              <LogIn className="h-4 w-4 shrink-0 text-sky-400" />
+              <span>Sign in</span>
             </motion.a>
           )}
         </div>
