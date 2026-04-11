@@ -129,10 +129,7 @@ export function FishCanvas() {
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
-      // Only react if click is inside the canvas
-      if (mx < 0 || mx > canvas.width || my < 0 || my > canvas.height) return;
-
-      // Ripple at click point
+      // Ripple at click point (even if outside — just clip visually)
       ripplesRef.current.push({ x: mx, y: my, r: 0, maxR: 80, alpha: 0.6 });
 
       // All fish rush toward click point
@@ -155,7 +152,7 @@ export function FishCanvas() {
     };
 
     window.addEventListener("mousemove", onMove);
-    canvas.addEventListener("click", onClick);
+    window.addEventListener("click", onClick);
 
     const draw = () => {
       const { width: W, height: H } = canvas;
@@ -274,14 +271,14 @@ export function FishCanvas() {
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
       window.removeEventListener("mousemove", onMove);
-      canvas.removeEventListener("click", onClick);
+      window.removeEventListener("click", onClick);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-auto"
+      className="absolute inset-0 w-full h-full pointer-events-none"
       style={{ mixBlendMode: "screen", zIndex: 5 }}
     />
   );
