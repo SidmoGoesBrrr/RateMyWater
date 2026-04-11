@@ -120,237 +120,165 @@ function AnimatedWaterDrop() {
   );
 }
 
-function OceanWaves() {
+function OceanFloor() {
+  const bubbles = [
+    { left: "3%",  bottom: 90,  size: 6, delay: "0s",   dur: "4.5s" },
+    { left: "8%",  bottom: 70,  size: 4, delay: "1.4s", dur: "3.5s" },
+    { left: "14%", bottom: 100, size: 8, delay: "0.6s", dur: "5.5s" },
+    { left: "20%", bottom: 75,  size: 5, delay: "2.2s", dur: "4.5s" },
+    { left: "28%", bottom: 88,  size: 6, delay: "1s",   dur: "4.2s" },
+    { left: "35%", bottom: 80,  size: 5, delay: "3s",   dur: "4s" },
+    { left: "42%", bottom: 95,  size: 7, delay: "0.3s", dur: "5s" },
+    { left: "50%", bottom: 70,  size: 4, delay: "2s",   dur: "3.8s" },
+    { left: "58%", bottom: 85,  size: 6, delay: "1.2s", dur: "4.3s" },
+    { left: "65%", bottom: 78,  size: 5, delay: "0.8s", dur: "4.6s" },
+    { left: "72%", bottom: 92,  size: 8, delay: "2.5s", dur: "5.2s" },
+    { left: "80%", bottom: 68,  size: 4, delay: "1.8s", dur: "4.1s" },
+    { left: "87%", bottom: 85,  size: 6, delay: "0.5s", dur: "4.4s" },
+    { left: "95%", bottom: 75,  size: 5, delay: "3.2s", dur: "3.9s" },
+  ];
+
+  const jellies = [
+    { bottom: 200, left: "8%",  w: 48, h: 66, delay: 0,   dur: 5.5, glow: "160,130,255" },
+    { bottom: 240, left: "30%", w: 36, h: 52, delay: 2,   dur: 6,   glow: "130,200,255" },
+    { bottom: 180, left: "52%", w: 42, h: 60, delay: 3.5, dur: 5,   glow: "180,140,255" },
+    { bottom: 220, left: "75%", w: 38, h: 54, delay: 1,   dur: 6.5, glow: "100,220,255" },
+    { bottom: 260, left: "92%", w: 32, h: 46, delay: 4,   dur: 5.8, glow: "200,160,255" },
+  ];
+
   return (
-    <div className="absolute bottom-0 left-0 right-0 overflow-hidden pointer-events-none" style={{ height: "140px" }}>
+    <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden" style={{ height: "580px" }}>
       <style>{`
-        @keyframes wave-slow   { from{transform:translateX(0)}   to{transform:translateX(-50%)} }
-        @keyframes wave-medium { from{transform:translateX(-50%)} to{transform:translateX(0)} }
-        @keyframes wave-fast   { from{transform:translateX(0)}   to{transform:translateX(-50%)} }
+        @keyframes wave-1     { from{transform:translateX(0)}   to{transform:translateX(-50%)} }
+        @keyframes wave-2     { from{transform:translateX(-50%)} to{transform:translateX(0)} }
+        @keyframes wave-3     { from{transform:translateX(-25%)} to{transform:translateX(-75%)} }
+        @keyframes bubble-up  { 0%{transform:translateY(0);opacity:0.65} 100%{transform:translateY(-200px);opacity:0} }
+        @keyframes jelly-drift { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+        @keyframes jelly-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes jelly-halo  { 0%,100%{opacity:0.25;transform:scale(1)} 50%{opacity:0.55;transform:scale(1.12)} }
       `}</style>
 
-      {/* Layer 1 — slowest, deepest ocean blue */}
-      <div
-        className="absolute bottom-0 left-0"
-        style={{ width: "200%", animation: "wave-slow 14s linear infinite" }}
-      >
-        <svg viewBox="0 0 2880 90" preserveAspectRatio="none" className="w-full" style={{ height: "90px" }}>
-          <path
-            d="M0 50 C180 20 360 80 540 50 C720 20 900 80 1080 50 C1260 20 1440 80 1620 50 C1800 20 1980 80 2160 50 C2340 20 2520 80 2700 50 C2790 35 2835 65 2880 50 L2880 90 L0 90 Z"
-            fill="rgba(8,80,128,0.65)"
-          />
-        </svg>
-      </div>
-
-      {/* Layer 2 — medium speed, mid blue */}
-      <div
-        className="absolute bottom-0 left-0"
-        style={{ width: "200%", animation: "wave-medium 9s linear infinite" }}
-      >
-        <svg viewBox="0 0 2880 70" preserveAspectRatio="none" className="w-full" style={{ height: "70px" }}>
-          <path
-            d="M0 35 C240 5 480 65 720 35 C960 5 1200 65 1440 35 C1680 5 1920 65 2160 35 C2400 5 2640 65 2880 35 L2880 70 L0 70 Z"
-            fill="rgba(14,116,185,0.5)"
-          />
-        </svg>
-      </div>
-
-      {/* Layer 3 — fastest, lightest cyan */}
-      <div
-        className="absolute bottom-0 left-0"
-        style={{ width: "200%", animation: "wave-fast 6s linear infinite" }}
-      >
-        <svg viewBox="0 0 2880 52" preserveAspectRatio="none" className="w-full" style={{ height: "52px" }}>
-          <path
-            d="M0 26 C360 4 720 48 1080 26 C1440 4 1800 48 2160 26 C2520 4 2880 48 2880 26 L2880 52 L0 52 Z"
-            fill="rgba(14,165,233,0.28)"
-          />
-        </svg>
-      </div>
-
-      {/* Thin foam line on top */}
-      <div
-        className="absolute bottom-0 left-0"
-        style={{ width: "200%", animation: "wave-slow 10s linear infinite reverse" }}
-      >
-        <svg viewBox="0 0 2880 28" preserveAspectRatio="none" className="w-full" style={{ height: "28px" }}>
-          <path
-            d="M0 14 C180 4 360 24 540 14 C720 4 900 24 1080 14 C1260 4 1440 24 1620 14 C1800 4 1980 24 2160 14 C2340 4 2520 24 2700 14 C2790 9 2835 19 2880 14 L2880 28 L0 28 Z"
-            fill="rgba(186,230,253,0.12)"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function OceanCreatures() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <style>{`
-        @keyframes fish-r  { 0%{transform:translateX(-120px) scaleX(-1)} 100%{transform:translateX(110vw) scaleX(-1)} }
-        @keyframes fish-l  { 0%{transform:translateX(110vw) scaleX(1)}  100%{transform:translateX(-120px) scaleX(1)} }
-        @keyframes bubble-up  { 0%{transform:translateY(0);opacity:0.55} 100%{transform:translateY(-80px);opacity:0} }
-        @keyframes sway    { 0%,100%{transform-origin:bottom center;transform:rotate(-6deg)} 50%{transform-origin:bottom center;transform:rotate(6deg)} }
-        @keyframes starfish-bob { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(12deg)} }
-        @keyframes jelly-float  { 0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(-18px) scaleY(1.06)} }
-      `}</style>
-
-      {/* ── Starfish — lower left ── */}
-      <div className="absolute" style={{ bottom: "170px", left: "5%", animation: "starfish-bob 4.5s ease-in-out infinite" }}>
-        <svg width="54" height="54" viewBox="0 0 100 100" opacity="0.9">
-          <path
-            d="M50,8 L61,35 L90,37 L67,56 L75,84 L50,68 L25,84 L33,56 L10,37 L39,35 Z"
-            fill="#e8622f"
-            stroke="#c94f1e"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          {/* Texture dots */}
-          <circle cx="50" cy="50" r="6" fill="#c94f1e" opacity="0.6" />
-          <circle cx="50" cy="35" r="3" fill="#c94f1e" opacity="0.4" />
-          <circle cx="63" cy="55" r="2.5" fill="#c94f1e" opacity="0.4" />
-          <circle cx="37" cy="55" r="2.5" fill="#c94f1e" opacity="0.4" />
-        </svg>
-      </div>
-
-      {/* ── Starfish 2 — right side, smaller ── */}
-      <div className="absolute hidden md:block" style={{ bottom: "175px", right: "7%", animation: "starfish-bob 5.5s ease-in-out infinite 1.5s" }}>
-        <svg width="36" height="36" viewBox="0 0 100 100" opacity="0.7">
-          <path
-            d="M50,8 L61,35 L90,37 L67,56 L75,84 L50,68 L25,84 L33,56 L10,37 L39,35 Z"
-            fill="#f97316"
-            stroke="#ea6010"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <circle cx="50" cy="50" r="6" fill="#ea6010" opacity="0.5" />
-        </svg>
-      </div>
-
-      {/* ── Seaweed left ── */}
-      <div className="absolute" style={{ bottom: "148px", left: "2%", animation: "sway 3.5s ease-in-out infinite" }}>
-        <svg width="28" height="90" viewBox="0 0 28 90" fill="none">
-          <path d="M14 90 C14 90 6 72 14 58 C22 44 6 34 14 20 C20 10 14 4 14 0" stroke="#1a7a50" strokeWidth="5" strokeLinecap="round" />
-          <path d="M14 70 C14 70 22 62 20 54" stroke="#22a262" strokeWidth="3" strokeLinecap="round" />
-          <path d="M14 48 C14 48 6 40 8 32" stroke="#22a262" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-      </div>
-      <div className="absolute" style={{ bottom: "148px", left: "8%", animation: "sway 4.2s ease-in-out infinite 0.8s" }}>
-        <svg width="22" height="70" viewBox="0 0 22 70" fill="none">
-          <path d="M11 70 C11 70 4 56 11 44 C18 32 4 24 11 12 C15 4 11 0 11 0" stroke="#1a6b43" strokeWidth="4" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* ── Seaweed right ── */}
-      <div className="absolute hidden sm:block" style={{ bottom: "148px", right: "3%", animation: "sway 3.8s ease-in-out infinite 0.5s" }}>
-        <svg width="28" height="85" viewBox="0 0 28 85" fill="none">
-          <path d="M14 85 C14 85 6 68 14 54 C22 40 6 30 14 16 C20 6 14 0 14 0" stroke="#177a4a" strokeWidth="5" strokeLinecap="round" />
-          <path d="M14 64 C14 64 22 56 20 48" stroke="#1da362" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* ── Jellyfish — upper right ── */}
-      <div className="absolute hidden md:block" style={{ top: "18%", right: "8%", animation: "jelly-float 5s ease-in-out infinite" }}>
-        <svg width="56" height="80" viewBox="0 0 56 80" fill="none" opacity="0.75">
-          {/* dome */}
-          <path d="M6 30 A22 22 0 0 1 50 30 C50 20 42 12 28 12 C14 12 6 20 6 30 Z" fill="rgba(186,230,253,0.28)" stroke="rgba(186,230,253,0.5)" strokeWidth="1.2" />
-          {/* inner dome shine */}
-          <path d="M13 26 A14 10 0 0 1 43 26" stroke="rgba(255,255,255,0.18)" strokeWidth="1" fill="none" />
-          {/* tentacles */}
-          {[10, 17, 24, 31, 38, 44].map((x, i) => (
-            <path
-              key={i}
-              d={`M${x} 30 C${x - 3} ${45 + i * 2} ${x + 4} ${52 + i * 2} ${x - 2} ${62 + i * 2}`}
-              stroke={`rgba(186,230,253,${0.25 + i * 0.03})`}
-              strokeWidth="1.2"
-              fill="none"
-              strokeLinecap="round"
-            />
-          ))}
-        </svg>
-      </div>
-
-      {/* ── Small fish swimming right ── */}
-      <div
-        className="absolute"
-        style={{ top: "30%", left: "-100px", animation: "fish-r 22s linear infinite 2s" }}
-      >
-        <svg width="80" height="38" viewBox="0 0 80 38" fill="none" opacity="0.7">
-          <path d="M60 19 L80 8 L80 30 Z" fill="rgba(96,165,250,0.65)" />
-          <ellipse cx="38" cy="19" rx="24" ry="10" fill="rgba(96,165,250,0.65)" />
-          <path d="M28 11 L34 2 L44 11" fill="rgba(56,130,210,0.4)" />
-          <circle cx="18" cy="17" r="3" fill="white" />
-          <circle cx="18.8" cy="17" r="1.6" fill="#1e3a5f" />
-          <line x1="30" y1="10" x2="30" y2="28" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* ── Larger fish swimming left ── */}
-      <div
-        className="absolute hidden sm:block"
-        style={{ top: "55%", right: "-120px", animation: "fish-l 28s linear infinite 6s" }}
-      >
-        <svg width="100" height="46" viewBox="0 0 100 46" fill="none" opacity="0.55">
-          <path d="M72 23 L100 10 L100 36 Z" fill="rgba(56,189,248,0.6)" />
-          <ellipse cx="46" cy="23" rx="30" ry="13" fill="rgba(56,189,248,0.6)" />
-          <path d="M32 13 L40 2 L52 13" fill="rgba(14,165,233,0.4)" />
-          <circle cx="20" cy="20" r="4" fill="white" />
-          <circle cx="21" cy="20" r="2" fill="#0c2d5e" />
-          <line x1="36" y1="11" x2="36" y2="35" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" />
-          <line x1="46" y1="11" x2="46" y2="35" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* ── Tiny fish lower ── */}
-      <div
-        className="absolute"
-        style={{ top: "70%", left: "-80px", animation: "fish-r 18s linear infinite 10s" }}
-      >
-        <svg width="54" height="26" viewBox="0 0 54 26" fill="none" opacity="0.6">
-          <path d="M40 13 L54 5 L54 21 Z" fill="rgba(134,239,172,0.55)" />
-          <ellipse cx="26" cy="13" rx="16" ry="7" fill="rgba(134,239,172,0.55)" />
-          <circle cx="12" cy="12" r="2.5" fill="white" />
-          <circle cx="12.5" cy="12" r="1.2" fill="#064e3b" />
-        </svg>
-      </div>
-
-      {/* ── Coral tubes — bottom right ── */}
-      <div className="absolute hidden md:block" style={{ bottom: "148px", right: "14%" }}>
-        <svg width="60" height="70" viewBox="0 0 60 70" fill="none" opacity="0.85">
-          <rect x="10" y="25" width="12" height="45" rx="6" fill="#5b8dd9" />
-          <rect x="24" y="15" width="14" height="55" rx="7" fill="#6b9ee9" />
-          <rect x="40" y="30" width="10" height="40" rx="5" fill="#e8622f" />
-          <circle cx="16" cy="24" r="7" fill="#4a7cc9" />
-          <circle cx="31" cy="13" r="8" fill="#5b8dd9" />
-          <circle cx="45" cy="29" r="6" fill="#d4531e" />
-          <ellipse cx="16" cy="24" rx="3" ry="2" fill="#2a5aa9" />
-          <ellipse cx="31" cy="13" rx="4" ry="2.5" fill="#3a68b9" />
-        </svg>
-      </div>
-
-      {/* ── Bubbles scattered ── */}
-      {[
-        { left: "15%", bottom: "240px", size: 6, delay: "0s", dur: "4s" },
-        { left: "18%", bottom: "200px", size: 4, delay: "1.2s", dur: "3.5s" },
-        { left: "22%", bottom: "260px", size: 8, delay: "0.5s", dur: "5s" },
-        { left: "80%", bottom: "220px", size: 5, delay: "2s", dur: "4.2s" },
-        { left: "85%", bottom: "250px", size: 7, delay: "0.8s", dur: "3.8s" },
-        { left: "12%", bottom: "300px", size: 4, delay: "1.8s", dur: "4.5s" },
-      ].map((b, i) => (
+      {/* ══════ GLOWING JELLYFISH ══════ */}
+      {jellies.map((j, i) => (
         <div
-          key={i}
+          key={`jelly-${i}`}
+          className="absolute"
+          style={{ bottom: `${j.bottom}px`, left: j.left, animation: `jelly-drift ${j.dur}s ease-in-out infinite ${j.delay}s` }}
+        >
+          {/* Outer glow halo */}
+          <div
+            className="absolute rounded-full blur-2xl"
+            style={{
+              width: j.w * 2.4,
+              height: j.w * 2,
+              top: -j.w * 0.5,
+              left: -j.w * 0.7,
+              backgroundColor: `rgba(${j.glow},0.2)`,
+              animation: `jelly-halo ${j.dur * 0.7}s ease-in-out infinite ${j.delay}s`,
+            }}
+          />
+          {/* Inner glow halo */}
+          <div
+            className="absolute rounded-full blur-xl"
+            style={{
+              width: j.w * 1.6,
+              height: j.w * 1.2,
+              top: -j.w * 0.1,
+              left: -j.w * 0.3,
+              backgroundColor: `rgba(${j.glow},0.3)`,
+              animation: `jelly-halo ${j.dur * 0.5}s ease-in-out infinite ${j.delay + 0.3}s`,
+            }}
+          />
+          <svg width={j.w} height={j.h} viewBox={`0 0 ${j.w} ${j.h}`} fill="none" style={{ animation: `jelly-pulse ${j.dur * 0.7}s ease-in-out infinite ${j.delay}s`, filter: `drop-shadow(0 0 8px rgba(${j.glow},0.6)) drop-shadow(0 0 20px rgba(${j.glow},0.3))` }}>
+            {/* Dome */}
+            <path
+              d={`M3 ${j.h * 0.38} A${j.w / 2 - 3} ${j.w / 2 - 3} 0 0 1 ${j.w - 3} ${j.h * 0.38} C${j.w - 3} ${j.h * 0.22} ${j.w * 0.75} ${j.h * 0.12} ${j.w / 2} ${j.h * 0.12} C${j.w * 0.25} ${j.h * 0.12} 3 ${j.h * 0.22} 3 ${j.h * 0.38} Z`}
+              fill={`rgba(${j.glow},0.35)`}
+              stroke={`rgba(${j.glow},0.8)`}
+              strokeWidth="1.5"
+            />
+            {/* Dome shine */}
+            <ellipse cx={j.w / 2} cy={j.h * 0.28} rx={j.w * 0.28} ry={j.h * 0.06} fill="rgba(255,255,255,0.2)" />
+            {/* Tentacles */}
+            {Array.from({ length: 6 }).map((_, ti) => {
+              const x = 4 + ti * ((j.w - 8) / 5);
+              return (
+                <path
+                  key={ti}
+                  d={`M${x} ${j.h * 0.38} C${x - 2} ${j.h * 0.55 + ti * 2} ${x + 3} ${j.h * 0.65 + ti} ${x - 1} ${j.h * 0.82 + ti}`}
+                  stroke={`rgba(${j.glow},${0.45 + ti * 0.06})`}
+                  strokeWidth="1.2"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              );
+            })}
+          </svg>
+        </div>
+      ))}
+
+      {/* ══════ BUBBLES ══════ */}
+      {bubbles.map((b, i) => (
+        <div
+          key={`bub-${i}`}
           className="absolute rounded-full border"
           style={{
             left: b.left,
             bottom: b.bottom,
             width: b.size,
             height: b.size,
-            borderColor: "rgba(186,230,253,0.4)",
+            borderColor: "rgba(165,225,250,0.5)",
             animation: `bubble-up ${b.dur} ease-in infinite ${b.delay}`,
           }}
         />
       ))}
+
+      {/* ══════ WAVE LAYERS — deep ocean ══════ */}
+
+      {/* Deep water base — solid, always visible */}
+      <div className="absolute bottom-0 left-0 right-0" style={{ height: "160px", background: "linear-gradient(to top, #04192a 0%, rgba(6,35,60,0.95) 40%, rgba(8,50,85,0.6) 70%, transparent 100%)" }} />
+
+      {/* Layer 1 — deepest undulation */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 14s linear infinite" }}>
+        <svg viewBox="0 0 2880 180" preserveAspectRatio="none" className="w-full" style={{ height: "180px" }}>
+          <path d="M0 90 C180 30 360 150 540 90 C720 30 900 150 1080 90 C1260 30 1440 150 1620 90 C1800 30 1980 150 2160 90 C2340 30 2520 150 2700 90 C2790 60 2835 120 2880 90 L2880 180 L0 180 Z" fill="rgba(6,40,75,0.9)" />
+        </svg>
+      </div>
+
+      {/* Layer 2 — dark blue */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 10s linear infinite" }}>
+        <svg viewBox="0 0 2880 140" preserveAspectRatio="none" className="w-full" style={{ height: "140px" }}>
+          <path d="M0 70 C240 18 480 122 720 70 C960 18 1200 122 1440 70 C1680 18 1920 122 2160 70 C2400 18 2640 122 2880 70 L2880 140 L0 140 Z" fill="rgba(10,70,120,0.75)" />
+        </svg>
+      </div>
+
+      {/* Layer 3 — mid ocean blue */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 7s linear infinite" }}>
+        <svg viewBox="0 0 2880 100" preserveAspectRatio="none" className="w-full" style={{ height: "100px" }}>
+          <path d="M0 50 C360 10 720 90 1080 50 C1440 10 1800 90 2160 50 C2520 10 2880 90 2880 50 L2880 100 L0 100 Z" fill="rgba(14,110,170,0.55)" />
+        </svg>
+      </div>
+
+      {/* Layer 4 — teal surface */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 8s linear infinite reverse" }}>
+        <svg viewBox="0 0 2880 70" preserveAspectRatio="none" className="w-full" style={{ height: "70px" }}>
+          <path d="M0 35 C180 8 360 62 540 35 C720 8 900 62 1080 35 C1260 8 1440 62 1620 35 C1800 8 1980 62 2160 35 C2340 8 2520 62 2700 35 C2790 22 2835 48 2880 35 L2880 70 L0 70 Z" fill="rgba(20,180,230,0.3)" />
+        </svg>
+      </div>
+
+      {/* Layer 5 — light cyan shimmer */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 6s linear infinite" }}>
+        <svg viewBox="0 0 2880 50" preserveAspectRatio="none" className="w-full" style={{ height: "48px" }}>
+          <path d="M0 25 C240 5 480 45 720 25 C960 5 1200 45 1440 25 C1680 5 1920 45 2160 25 C2400 5 2640 45 2880 25 L2880 50 L0 50 Z" fill="rgba(34,211,238,0.2)" />
+        </svg>
+      </div>
+
+      {/* Layer 6 — foam crest */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 5s linear infinite reverse" }}>
+        <svg viewBox="0 0 2880 32" preserveAspectRatio="none" className="w-full" style={{ height: "30px" }}>
+          <path d="M0 16 C180 4 360 28 540 16 C720 4 900 28 1080 16 C1260 4 1440 28 1620 16 C1800 4 1980 28 2160 16 C2340 4 2520 28 2700 16 C2790 10 2835 22 2880 16 L2880 32 L0 32 Z" fill="rgba(186,230,253,0.15)" />
+        </svg>
+      </div>
     </div>
   );
 }
@@ -538,13 +466,14 @@ export default function HomePage() {
           ))}
         </div>
 
+        {/* Ocean floor scene */}
+        <OceanFloor />
+
         {/* Background water glow blobs */}
         <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-cyan-400/12 rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/6 w-48 h-48 bg-teal-400/8 rounded-full blur-2xl" />
 
-        {/* Ocean creatures */}
-        <OceanCreatures />
 
         <div className="relative max-w-2xl mx-auto px-5 pt-16 pb-36 text-center">
           {/* Animated SVG water drop */}
@@ -605,8 +534,6 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Layered ocean waves */}
-        <OceanWaves />
       </section>
 
       {/* ── MAP PREVIEW ──────────────────────────────────────── */}
