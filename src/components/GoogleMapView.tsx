@@ -1,9 +1,10 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   GoogleMap,
   OverlayView,
 } from "@react-google-maps/api";
+import Supercluster from "supercluster";
 import { useGoogleMaps } from "@/lib/google-maps";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -12,6 +13,19 @@ import { MapPin, Star, X } from "lucide-react";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { AppleEmoji } from "@/components/WaterRatingPicker";
 import { cn } from "@/lib/utils";
+
+// ── Clustering types ─────────────────────────────────────────────────────────
+// Supercluster stores each input as a GeoJSON Point with arbitrary properties.
+// We stash the water body's _id in the properties so we can look up the full
+// record when the cluster resolves to a single unclustered point.
+type PointProps = { waterId: string };
+// Cluster-level properties Supercluster tags onto grouped features.
+type ClusterProps = {
+  cluster: true;
+  cluster_id: number;
+  point_count: number;
+  point_count_abbreviated: number | string;
+};
 
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: "geometry", stylers: [{ color: "#0a1628" }] },
@@ -51,6 +65,84 @@ function getScoreColor(score: number) {
 const PIN_W = 48;
 const PIN_H = 64;
 const PIN_OFFSET = { x: -(PIN_W / 2), y: -PIN_H };
+
+// ── ClusterPin ───────────────────────────────────────────────────────────────
+// Rendered in place of individual WaterPins when Supercluster groups several
+// nearby water bodies at the current zoom level. Same visual language as the
+// individual pin (circular, colored by average score, score badge below) so
+// the map feels consistent zoomed in vs. out.
+//
+// Size scales with point_count: tiny clusters (2–5) match the regular pin,
+// medium (6–20) get +25%, large (21+) get +50%. Prevents the "a cluster of
+// 3 looks identical to a single pin" visual collision, and keeps huge
+// clusters from dominating the map.
+function ClusterPin({
+  count,
+  avgScore,
+  onClick,
+}: {
+  count: number;
+  avgScore: number;
+  onClick: () => void;
+}) {
+  const color = getScoreColor(avgScore);
+  const scale = count >= 21 ? 1.5 : count >= 6 ? 1.25 : 1;
+  const sizePx = 36 * scale;
+
+  return (
+    <div style={{ width: PIN_W * scale, height: PIN_H * scale }} className="relative">
+      <button
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer group"
+      >
+        {/* Cluster body */}
+        <div
+          className="rounded-full border-2 flex items-center justify-center shadow-lg relative transition-transform duration-150 group-hover:scale-110"
+          style={{
+            width: sizePx,
+            height: sizePx,
+            backgroundColor: `${color}30`,
+            borderColor: color,
+            boxShadow: `0 0 16px ${color}40, 0 4px 12px rgba(0,0,0,0.5)`,
+          }}
+        >
+          <span
+            className="font-black tabular-nums"
+            style={{
+              color,
+              fontSize: count >= 100 ? 12 * scale : 14 * scale,
+            }}
+          >
+            {count}
+          </span>
+          {/* Soft pulsing halo so clusters feel alive like selected pins */}
+          <motion.div
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{ border: `2px solid ${color}` }}
+            animate={{ scale: [1, 1.35, 1], opacity: [0.55, 0, 0.55] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
+          />
+        </div>
+        {/* Label below — tells the user this is a group, not just a big pin */}
+        <div
+          className="mt-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider leading-none shadow"
+          style={{ backgroundColor: color, color: "#000" }}
+        >
+          spots
+        </div>
+        {/* Pointer */}
+        <div
+          className="w-0 h-0 mt-[-2px]"
+          style={{
+            borderLeft: "5px solid transparent",
+            borderRight: "5px solid transparent",
+            borderTop: `6px solid ${color}`,
+          }}
+        />
+      </button>
+    </div>
+  );
+}
 
 function WaterPin({ water, onClick, isSelected }: { water: MapWaterEntry; onClick: () => void; isSelected: boolean }) {
   const meta = water.topRating ? RATING_META[water.topRating] : null;
@@ -136,12 +228,184 @@ export function GoogleMapView({
   const [selected, setSelected] = useState<MapWaterEntry | null>(null);
   const [infoPos, setInfoPos] = useState<{ lat: number; lng: number } | null>(null);
 
+  // ── Clustering ──────────────────────────────────────────────────────────
+  // We re-cluster on `onIdle` (not `onBoundsChanged`) to avoid thrashing
+  // React state 60x per second during pan/drag. Supercluster's internal
+  // index is fast enough that we could re-run every frame, but the React
+  // re-render cost is what kills us. `onIdle` fires once when the map
+  // stops moving — perfect cadence.
+  //
+  // Between interactions, cluster lat/lngs don't change, so the existing
+  // cluster pins glide along with the map during a pan with zero recompute.
+  const [viewport, setViewport] = useState<{
+    bbox: [number, number, number, number]; // [west, south, east, north]
+    zoom: number;
+  } | null>(null);
+
+  // Only waters that have coordinates can be clustered or pinned at all.
+  // Pulled out once so both the supercluster index and the fallback path
+  // (used before the first onIdle fires) share the same source list.
+  const pinnableWaters = useMemo(
+    () => waters.filter((w): w is MapWaterEntry & { coordinates: { lat: number; lng: number } } => !!w.coordinates),
+    [waters],
+  );
+
+  // Index is memoized per waters[] so we don't rebuild it on every viewport
+  // change. `radius: 60` = pixels at the current zoom level that supercluster
+  // considers "close enough to merge." 60px is roughly one-and-a-half pin
+  // widths, which felt right when sanity-checking against the existing
+  // PIN_W of 48. `maxZoom: 16` stops clustering once the user has zoomed
+  // in enough that overlap stops mattering.
+  const clusterIndex = useMemo(() => {
+    const idx = new Supercluster<PointProps, ClusterProps>({
+      radius: 60,
+      maxZoom: 16,
+    });
+    idx.load(
+      pinnableWaters.map((w) => ({
+        type: "Feature" as const,
+        properties: { waterId: w._id },
+        geometry: {
+          type: "Point" as const,
+          // GeoJSON order is [lng, lat] — NOT [lat, lng]. Easy to get wrong.
+          coordinates: [w.coordinates.lng, w.coordinates.lat],
+        },
+      })),
+    );
+    return idx;
+  }, [pinnableWaters]);
+
+  // Fast lookup for when a cluster resolves to a single water body (point_count
+  // absent). Rebuilt alongside the index.
+  const waterById = useMemo(() => {
+    const m = new Map<string, MapWaterEntry>();
+    for (const w of pinnableWaters) m.set(w._id, w);
+    return m;
+  }, [pinnableWaters]);
+
+  // The actual cluster + point features to render at the current viewport.
+  // If viewport hasn't been measured yet (before the map's first `onIdle`),
+  // we render all pinnable waters as individual points with no clustering —
+  // matches pre-feature behavior and avoids a blank map on first paint.
+  const clusters = useMemo(() => {
+    if (!viewport) {
+      // pinnableWaters is already narrowed to entries with coordinates,
+      // so w.coordinates is guaranteed here — but TypeScript needs the
+      // assertion below to propagate that narrowing into the union result.
+      return pinnableWaters.map((w) => ({
+        kind: "point" as const,
+        water: w,
+        lat: w.coordinates.lat,
+        lng: w.coordinates.lng,
+      })) as Array<{
+        kind: "point";
+        water: MapWaterEntry & { coordinates: { lat: number; lng: number } };
+        lat: number;
+        lng: number;
+      }>;
+    }
+    const features = clusterIndex.getClusters(viewport.bbox, Math.floor(viewport.zoom));
+    return features.map((f) => {
+      const [lng, lat] = f.geometry.coordinates;
+      // Supercluster returns a heterogeneous array: cluster features
+      // (ClusterProps with `cluster: true`) and point features (PointProps
+      // with our `waterId`). TypeScript's narrowing through "in" checks
+      // doesn't propagate across the union cleanly, so we widen to a
+      // record type and key off a single runtime flag.
+      const rawProps = f.properties as Record<string, unknown>;
+      const isCluster = rawProps.cluster === true;
+      if (isCluster) {
+        const clusterProps = rawProps as unknown as ClusterProps;
+        const clusterId = clusterProps.cluster_id;
+        // Average score across all the water bodies under this cluster.
+        // `getLeaves` with Infinity limit walks every descendant; fine at
+        // our scale. If the cluster tree ever gets massive, cap the limit
+        // to ~50 and accept a sample average.
+        const leaves = clusterIndex.getLeaves(clusterId, Infinity);
+        let sum = 0;
+        let n = 0;
+        for (const leaf of leaves) {
+          const w = waterById.get(leaf.properties.waterId);
+          if (w && w.totalRatings > 0) {
+            sum += w.averageScore;
+            n++;
+          }
+        }
+        const avgScore = n > 0 ? sum / n : 0;
+        return {
+          kind: "cluster" as const,
+          clusterId,
+          count: clusterProps.point_count,
+          avgScore,
+          lat,
+          lng,
+        };
+      }
+      const pointProps = rawProps as unknown as PointProps;
+      const w = waterById.get(pointProps.waterId);
+      if (!w || !w.coordinates) return null;
+      return {
+        kind: "point" as const,
+        water: w as MapWaterEntry & { coordinates: { lat: number; lng: number } },
+        lat,
+        lng,
+      };
+    }).filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [viewport, clusterIndex, waterById, pinnableWaters]);
+
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
     if (mode === "full") {
       map.setTilt(45);
     }
   }, [mode]);
+
+  // Re-measure the viewport every time the map settles. Called once after
+  // tiles load, then after every pan/zoom interaction finishes.
+  const onIdle = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const bounds = map.getBounds();
+    const zoom = map.getZoom();
+    if (!bounds || zoom == null) return;
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    setViewport({
+      bbox: [sw.lng(), sw.lat(), ne.lng(), ne.lat()],
+      zoom,
+    });
+  }, []);
+
+  // Clicking a cluster drills in. `getClusterExpansionZoom` returns the zoom
+  // level at which this cluster will break apart into smaller clusters (or
+  // individual points). Pan to the cluster's center and zoom there, so the
+  // user sees the split happen smoothly from the point they tapped.
+  const onClusterClick = useCallback((clusterId: number, lat: number, lng: number) => {
+    const map = mapRef.current;
+    if (!map) return;
+    try {
+      const expansionZoom = clusterIndex.getClusterExpansionZoom(clusterId);
+      map.panTo({ lat, lng });
+      map.setZoom(Math.min(expansionZoom, 16));
+    } catch {
+      // getClusterExpansionZoom throws if the cluster id no longer exists
+      // (e.g. user interacted during a re-cluster). Fall back to a plain
+      // +2 zoom step toward the click point.
+      const current = map.getZoom() ?? 3;
+      map.panTo({ lat, lng });
+      map.setZoom(Math.min(current + 2, 16));
+    }
+  }, [clusterIndex]);
+
+  // Seed the viewport once the map finishes loading initial tiles. Some
+  // environments (including unit tests, oddly) fire `onLoad` before
+  // `getBounds()` is available — in that case `onIdle` handles it.
+  useEffect(() => {
+    if (!mapRef.current || viewport) return;
+    onIdle();
+    // Intentionally only depending on isLoaded so this runs once per mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded]);
 
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (mode === "mini" && e.latLng && onMiniMarkerChange) {
@@ -203,26 +467,48 @@ export function GoogleMapView({
         zoom={zoom}
         options={mapOptions}
         onLoad={onLoad}
+        onIdle={mode === "full" ? onIdle : undefined}
         onClick={onMapClick}
       >
-        {/* Water body pins */}
-        {mode === "full" && waters.map((w) => {
-          if (!w.coordinates) return null;
-          const isActive = selected?._id === w._id;
+        {/* Cluster + pin layer. `clusters` is the derived render list —
+            either a flat pinnableWaters (before first onIdle) or the
+            output of supercluster.getClusters(bbox, zoom). Each entry
+            branches between a ClusterPin (group of N) and a WaterPin
+            (individual). */}
+        {mode === "full" && clusters.map((c) => {
+          if (c.kind === "cluster") {
+            return (
+              <OverlayView
+                key={`c-${c.clusterId}`}
+                position={{ lat: c.lat, lng: c.lng }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={getPinOffset}
+              >
+                <div style={{ position: "relative", zIndex: selected ? -1 : 2 }}>
+                  <ClusterPin
+                    count={c.count}
+                    avgScore={c.avgScore}
+                    onClick={() => onClusterClick(c.clusterId, c.lat, c.lng)}
+                  />
+                </div>
+              </OverlayView>
+            );
+          }
+          const isActive = selected?._id === c.water._id;
           return (
             <OverlayView
-              key={w._id}
-              position={w.coordinates}
+              key={`p-${c.water._id}`}
+              position={c.water.coordinates}
               mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               getPixelPositionOffset={getPinOffset}
             >
               <div style={{ zIndex: isActive ? 1000 : (selected ? -1 : 1), position: "relative" }}>
                 <WaterPin
-                  water={w}
+                  water={c.water}
                   isSelected={isActive}
                   onClick={() => {
-                    setSelected(w);
-                    setInfoPos(w.coordinates!);
+                    setSelected(c.water);
+                    setInfoPos(c.water.coordinates);
                   }}
                 />
               </div>
