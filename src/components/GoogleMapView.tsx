@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: "geometry", stylers: [{ color: "#0a1628" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#060d1f" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#0a1628" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#7ec8e3" }] },
   { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d2137" }] },
   { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#22d3ee" }] },
@@ -298,11 +298,11 @@ function WaterInfoCard({ water, onClose }: { water: MapWaterEntry; onClose: () =
   return (
     <div
       className="rounded-2xl overflow-hidden shadow-2xl"
-      style={{ width: 240, background: "#0d1926", border: "1px solid rgba(255,255,255,0.1)" }}
+      style={{ width: 240, background: "#0d1f35", border: "1px solid rgba(255,255,255,0.1)" }}
     >
       <div className="relative h-32 w-full">
         <Image src={water.imageUrl} alt={water.name} fill className="object-cover" sizes="240px" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0d1926] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d1f35] to-transparent" />
       </div>
       <div className="p-3">
         <h3 className="font-bold text-white text-sm leading-tight">{water.name}</h3>

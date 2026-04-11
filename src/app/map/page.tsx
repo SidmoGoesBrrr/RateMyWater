@@ -84,7 +84,7 @@ export default function MapPage() {
   const mapZoom = userCenter ? 12 : 14;
 
   return (
-    <main className="h-screen bg-[#060d1f] flex flex-col pt-14 md:pt-14">
+    <main className="h-screen bg-[#0a1628] flex flex-col pt-14 md:pt-14">
       {/* ── Top Controls ─────────────────────────────────── */}
       <div className="flex-shrink-0 px-4 py-3 space-y-2">
         {/* Search */}

@@ -142,18 +142,18 @@ function AnimatedWaterDrop() {
 
 function OceanFloor() {
   const fish = [
-    { bottom: 60,  dir: "r", dur: 20, delay: 0,   w: 46, h: 22, color: "96,185,255"  },
-    { bottom: 100, dir: "l", dur: 23, delay: 3,   w: 54, h: 26, color: "56,200,248"  },
-    { bottom: 140, dir: "r", dur: 18, delay: 6,   w: 42, h: 20, color: "134,220,180" },
-    { bottom: 180, dir: "l", dur: 25, delay: 1,   w: 50, h: 24, color: "120,180,255" },
-    { bottom: 220, dir: "r", dur: 21, delay: 9,   w: 48, h: 22, color: "80,210,220"  },
-    { bottom: 260, dir: "l", dur: 17, delay: 5,   w: 44, h: 20, color: "96,160,250"  },
-    { bottom: 80,  dir: "l", dur: 22, delay: 12,  w: 40, h: 18, color: "70,190,240"  },
-    { bottom: 160, dir: "r", dur: 19, delay: 8,   w: 52, h: 24, color: "100,200,230" },
-    { bottom: 240, dir: "l", dur: 24, delay: 2,   w: 38, h: 16, color: "140,230,200" },
-    { bottom: 120, dir: "r", dur: 16, delay: 11,  w: 56, h: 26, color: "80,170,255"  },
-    { bottom: 200, dir: "l", dur: 26, delay: 7,   w: 44, h: 20, color: "60,180,250"  },
-    { bottom: 280, dir: "r", dur: 20, delay: 4,   w: 40, h: 18, color: "120,230,210" },
+    { bottom: 60,  dur: 20, delay: 0,   w: 46, h: 22, color: "96,185,255"  },
+    { bottom: 100, dur: 23, delay: 3,   w: 54, h: 26, color: "56,200,248"  },
+    { bottom: 140, dur: 18, delay: 6,   w: 42, h: 20, color: "134,220,180" },
+    { bottom: 180, dur: 25, delay: 1,   w: 50, h: 24, color: "120,180,255" },
+    { bottom: 220, dur: 21, delay: 9,   w: 48, h: 22, color: "80,210,220"  },
+    { bottom: 260, dur: 17, delay: 5,   w: 44, h: 20, color: "96,160,250"  },
+    { bottom: 80,  dur: 22, delay: 12,  w: 40, h: 18, color: "70,190,240"  },
+    { bottom: 160, dur: 19, delay: 8,   w: 52, h: 24, color: "100,200,230" },
+    { bottom: 240, dur: 24, delay: 2,   w: 38, h: 16, color: "140,230,200" },
+    { bottom: 120, dur: 16, delay: 11,  w: 56, h: 26, color: "80,170,255"  },
+    { bottom: 200, dur: 26, delay: 7,   w: 44, h: 20, color: "60,180,250"  },
+    { bottom: 280, dur: 20, delay: 4,   w: 40, h: 18, color: "120,230,210" },
   ];
 
   const bubbles = [
@@ -185,11 +185,8 @@ function OceanFloor() {
     <div className="absolute bottom-0 left-0 right-0 pointer-events-none overflow-hidden" style={{ height: "580px" }}>
       <style>{`
         @keyframes wave-1     { from{transform:translateX(0)}   to{transform:translateX(-50%)} }
-        @keyframes wave-2     { from{transform:translateX(-50%)} to{transform:translateX(0)} }
-        @keyframes wave-3     { from{transform:translateX(-25%)} to{transform:translateX(-75%)} }
         @keyframes bubble-up  { 0%{transform:translateY(0);opacity:0.85} 100%{transform:translateY(-260px);opacity:0} }
         @keyframes fish-r     { 0%{transform:translateX(-120px) scaleX(-1)} 100%{transform:translateX(110vw) scaleX(-1)} }
-        @keyframes fish-l     { 0%{transform:translateX(110vw) scaleX(1)}  100%{transform:translateX(-120px) scaleX(1)} }
         @keyframes jelly-drift { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
         @keyframes jelly-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
         @keyframes jelly-halo  { 0%,100%{opacity:0.25;transform:scale(1)} 50%{opacity:0.55;transform:scale(1.12)} }
@@ -279,8 +276,8 @@ function OceanFloor() {
           className="absolute"
           style={{
             bottom: `${f.bottom}px`,
-            [f.dir === "r" ? "left" : "right"]: "-120px",
-            animation: `fish-${f.dir} ${f.dur}s linear infinite ${f.delay}s`,
+            left: "-120px",
+            animation: `fish-r ${f.dur}s linear infinite ${f.delay}s`,
           }}
         >
           <svg width={f.w} height={f.h} viewBox={`0 0 ${f.w} ${f.h}`} fill="none" opacity="0.6">
@@ -295,47 +292,47 @@ function OceanFloor() {
       {/* ══════ WAVE LAYERS — deep ocean ══════ */}
 
       {/* Deep water base — solid, always visible */}
-      <div className="absolute bottom-0 left-0 right-0" style={{ height: "160px", background: "linear-gradient(to top, #04192a 0%, rgba(6,35,60,0.95) 40%, rgba(8,50,85,0.6) 70%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0" style={{ height: "160px", background: "linear-gradient(to top, #0a1628 0%, rgba(10,30,55,0.95) 40%, rgba(12,45,78,0.6) 70%, transparent 100%)" }} />
 
-      {/* Layer 1 — deepest undulation (flipped: troughs first) */}
-      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 14s linear infinite" }}>
+      {/* Layer 1 — deepest undulation */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 22s linear infinite" }}>
         <svg viewBox="0 0 2880 160" preserveAspectRatio="none" className="w-full" style={{ height: "160px" }}>
-          <path d="M0 80 C360 115 720 45 1080 80 C1440 115 1800 45 2160 80 C2520 115 2880 45 2880 80 L2880 160 L0 160 Z" fill="rgba(6,40,75,0.9)" />
+          <path d="M0 80 C240 115 480 45 720 80 C960 115 1200 45 1440 80 C1680 115 1920 45 2160 80 C2400 115 2640 45 2880 80 L2880 160 L0 160 Z" fill="rgba(6,40,75,0.9)" />
         </svg>
       </div>
 
-      {/* Layer 2 — dark blue (flipped) */}
-      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 10s linear infinite" }}>
+      {/* Layer 2 — dark blue */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 17s linear infinite" }}>
         <svg viewBox="0 0 2880 120" preserveAspectRatio="none" className="w-full" style={{ height: "120px" }}>
-          <path d="M0 60 C360 90 720 30 1080 60 C1440 90 1800 30 2160 60 C2520 90 2880 30 2880 60 L2880 120 L0 120 Z" fill="rgba(10,70,120,0.75)" />
+          <path d="M0 60 C240 90 480 30 720 60 C960 90 1200 30 1440 60 C1680 90 1920 30 2160 60 C2400 90 2640 30 2880 60 L2880 120 L0 120 Z" fill="rgba(10,70,120,0.75)" />
         </svg>
       </div>
 
-      {/* Layer 3 — mid ocean blue (flipped) */}
-      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 7s linear infinite" }}>
+      {/* Layer 3 — mid ocean blue */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 13s linear infinite" }}>
         <svg viewBox="0 0 2880 90" preserveAspectRatio="none" className="w-full" style={{ height: "90px" }}>
-          <path d="M0 45 C360 70 720 20 1080 45 C1440 70 1800 20 2160 45 C2520 70 2880 20 2880 45 L2880 90 L0 90 Z" fill="rgba(14,110,170,0.55)" />
+          <path d="M0 45 C240 70 480 20 720 45 C960 70 1200 20 1440 45 C1680 70 1920 20 2160 45 C2400 70 2640 20 2880 45 L2880 90 L0 90 Z" fill="rgba(14,110,170,0.55)" />
         </svg>
       </div>
 
-      {/* Layer 4 — teal surface (flipped) */}
-      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 8s linear infinite reverse" }}>
+      {/* Layer 4 — teal surface */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 10s linear infinite" }}>
         <svg viewBox="0 0 2880 60" preserveAspectRatio="none" className="w-full" style={{ height: "60px" }}>
-          <path d="M0 30 C360 48 720 12 1080 30 C1440 48 1800 12 2160 30 C2520 48 2880 12 2880 30 L2880 60 L0 60 Z" fill="rgba(20,180,230,0.3)" />
+          <path d="M0 30 C240 48 480 12 720 30 C960 48 1200 12 1440 30 C1680 48 1920 12 2160 30 C2400 48 2640 12 2880 30 L2880 60 L0 60 Z" fill="rgba(20,180,230,0.3)" />
         </svg>
       </div>
 
-      {/* Layer 5 — light cyan shimmer (flipped) */}
-      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 6s linear infinite" }}>
+      {/* Layer 5 — light cyan shimmer */}
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 8s linear infinite" }}>
         <svg viewBox="0 0 2880 45" preserveAspectRatio="none" className="w-full" style={{ height: "45px" }}>
-          <path d="M0 22 C360 36 720 8 1080 22 C1440 36 1800 8 2160 22 C2520 36 2880 8 2880 22 L2880 45 L0 45 Z" fill="rgba(34,211,238,0.2)" />
+          <path d="M0 22 C240 36 480 8 720 22 C960 36 1200 8 1440 22 C1680 36 1920 8 2160 22 C2400 36 2640 8 2880 22 L2880 45 L0 45 Z" fill="rgba(34,211,238,0.2)" />
         </svg>
       </div>
 
       {/* Layer 6 — foam crest */}
-      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 5s linear infinite reverse" }}>
+      <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 6s linear infinite" }}>
         <svg viewBox="0 0 2880 30" preserveAspectRatio="none" className="w-full" style={{ height: "30px" }}>
-          <path d="M0 15 C360 5 720 25 1080 15 C1440 5 1800 25 2160 15 C2520 5 2880 25 2880 15 L2880 30 L0 30 Z" fill="rgba(186,230,253,0.15)" />
+          <path d="M0 15 C240 5 480 25 720 15 C960 5 1200 25 1440 15 C1680 5 1920 25 2160 15 C2400 5 2640 25 2880 15 L2880 30 L0 30 Z" fill="rgba(186,230,253,0.15)" />
         </svg>
       </div>
     </div>
@@ -507,7 +504,7 @@ export default function HomePage() {
   }, [tab, userPos, loadGlobal, loadNearby]);
 
   return (
-    <main className="min-h-screen bg-[#082232] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#0a1628] text-white overflow-x-hidden">
       <AnimatePresence>
         {showAnimation && <WaterDropAnimation onComplete={handleAnimationComplete} />}
       </AnimatePresence>
@@ -605,7 +602,7 @@ export default function HomePage() {
               href="/map"
               className="group block relative rounded-3xl overflow-hidden border border-white/8 hover:border-sky-500/30 transition-all duration-300 shadow-2xl shadow-black/40"
             >
-              <div className="h-72 md:h-[420px] relative bg-[#082535]">
+              <div className="h-72 md:h-[420px] relative bg-[#0d1f35]">
                 {/* Grid lines */}
                 <div
                   className="absolute inset-0"
@@ -642,7 +639,7 @@ export default function HomePage() {
                 ))}
 
                 {/* Bottom gradient */}
-                <div className="absolute inset-0 bg-linear-to-t from-[#082535]/95 via-[#082535]/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0d1f35]/95 via-[#0d1f35]/20 to-transparent" />
                 {/* Hover tint */}
                 <div className="absolute inset-0 bg-sky-500/0 group-hover:bg-sky-500/4 transition-all duration-300" />
 
@@ -701,7 +698,7 @@ export default function HomePage() {
                 <div
                   className="absolute inset-0"
                   style={{
-                    background: `linear-gradient(160deg, ${meta.color}18 0%, #071a2e 55%, #040f1c 100%)`,
+                    background: `linear-gradient(160deg, ${meta.color}18 0%, #0d1f35 55%, #0a1628 100%)`,
                   }}
                 />
 

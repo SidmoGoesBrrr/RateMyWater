@@ -83,7 +83,7 @@ function GridCard({ water, index }: { water: WaterCardData; index: number }) {
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative overflow-hidden cursor-pointer bg-[#082232] aspect-square"
+      className="relative overflow-hidden cursor-pointer bg-[#0a1628] aspect-square"
     >
       <Link href={`/water/${water._id}`} className="absolute inset-0">
         <Image
@@ -212,9 +212,9 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#082232] text-white pt-14 md:pt-16 overflow-x-hidden">
+    <main className="min-h-screen bg-[#0a1628] text-white pt-14 md:pt-16 overflow-x-hidden">
       {/* ── Sticky search header ── */}
-      <div className="sticky top-14 md:top-16 z-30 bg-[#082232]/96 backdrop-blur-xl border-b border-white/6 px-4 py-3">
+      <div className="sticky top-14 md:top-16 z-30 bg-[#0a1628]/96 backdrop-blur-xl border-b border-white/6 px-4 py-3">
         <div className="max-w-5xl mx-auto space-y-3">
 
           {/* Search bar + suggestion dropdown */}
@@ -254,7 +254,7 @@ export default function SearchPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl border border-white/10 bg-[#0a1a2e]/98 backdrop-blur-xl shadow-2xl overflow-hidden z-50"
+                  className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl border border-white/10 bg-[#0d1f35]/98 backdrop-blur-xl shadow-2xl overflow-hidden z-50"
                 >
                   <div className="py-1">
                     {suggestions.map((w) => (

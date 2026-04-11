@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
-/* ── Custom properties ─────────────────────────────────────── */
+/* ── Ocean theme palette ──────────────────────────────────── */
 :root {
+  --ocean-deep: #0a1628;
+  --ocean-mid: #0d1f35;
+  --ocean-surface: #112a42;
   --cyan: #22d3ee;
   --blue: #3b82f6;
   --teal: #2dd4bf;
@@ -17,7 +20,7 @@ html {
 }
 
 body {
-  background-color: #060d1f;
+  background-color: var(--ocean-deep);
   color: white;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
