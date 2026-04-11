@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongoose";
 import WaterBody from "@/models/WaterBody";
-import { embedDocument, waterBodyToEmbeddingText } from "@/lib/embeddings";
 
 // GET /api/water
 // Cursor-paginated feed of water bodies. Cursor is the ISO `createdAt` of the
@@ -96,27 +95,6 @@ export async function POST(req: NextRequest) {
       uploadedBy: uploadedBy?.trim() || "Anonymous",
       ...(coordinates?.lat && coordinates?.lng ? { coordinates } : {}),
     });
-
-    // Generate the semantic embedding inline. Adds ~200-500ms to the
-    // request but gives deterministic behavior on Vercel serverless —
-    // fire-and-forget promises can be killed when the function shuts
-    // down. If Voyage fails (rate limit, missing key, network), the
-    // submit still succeeds; semantic search will skip this doc until
-    // the backfill script picks it up.
-    try {
-      const text = waterBodyToEmbeddingText({
-        name: waterBody.name,
-        location: waterBody.location,
-        type: waterBody.type,
-        description: waterBody.description,
-        topRating: waterBody.topRating,
-        uploadedBy: waterBody.uploadedBy,
-      });
-      const embedding = await embedDocument(text);
-      await WaterBody.updateOne({ _id: waterBody._id }, { $set: { embedding } });
-    } catch (embedErr) {
-      console.error("Embedding generation failed for water body", waterBody._id, embedErr);
-    }
 
     return NextResponse.json(waterBody, { status: 201 });
   } catch (err) {

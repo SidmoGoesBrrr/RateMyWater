@@ -24,10 +24,6 @@ export interface IWaterBody extends Document {
   totalRatings: number;
   topRating?: WaterRating;
   coordinates?: { lat: number; lng: number };
-  // Semantic search embedding from Voyage (voyage-3-large, 1024 dims).
-  // Populated on insert (best-effort, non-blocking) and by the backfill
-  // script. Missing embeddings are skipped by semantic search.
-  embedding?: number[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,11 +58,6 @@ const WaterBodySchema = new Schema<IWaterBody>(
       lat: { type: Number },
       lng: { type: Number },
     },
-    // Plain number array — no Mongoose index. Semantic search loads these
-    // into Node and scores in memory (M0-friendly). Select false so we
-    // don't ship embeddings to the feed/map/list endpoints where they're
-    // dead weight (each is ~8KB).
-    embedding: { type: [Number], select: false, default: undefined },
   },
   { timestamps: true }
 );
