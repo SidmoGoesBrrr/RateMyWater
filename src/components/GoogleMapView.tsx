@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star, X } from "lucide-react";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
+import { AppleEmoji } from "@/components/WaterRatingPicker";
 import { cn } from "@/lib/utils";
 
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
@@ -72,7 +73,10 @@ function WaterPin({ water, onClick, isSelected }: { water: MapWaterEntry; onClic
             transform: isSelected ? "scale(1.15)" : undefined,
           }}
         >
-          {meta ? meta.emoji : "💧"}
+          {meta
+            ? <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={18} />
+            : <AppleEmoji hex="1f4a7" fallback="💧" size={18} />
+          }
           {isSelected && (
             <motion.div
               className="absolute inset-0 rounded-full"
@@ -315,7 +319,8 @@ function WaterInfoCard({ water, onClose }: { water: MapWaterEntry; onClose: () =
             className="mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium border"
             style={{ color: meta.color, borderColor: `${meta.color}30`, backgroundColor: `${meta.color}10` }}
           >
-            {meta.emoji} {meta.label}
+            <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={13} />
+            {meta.label}
           </div>
         )}
         {water.totalRatings > 0 && (
