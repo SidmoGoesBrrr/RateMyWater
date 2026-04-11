@@ -87,16 +87,18 @@ export function Navbar() {
         {/* Auth control */}
         <div className="ml-auto flex items-center">
           {isLoading ? null : user ? (
+            /* Sign-out: red/destructive — visually distinct from sign-in */
             <motion.a
               href="/auth/logout"
-              whileHover={{ scale: 1.05, x: 2 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 16px rgba(239,68,68,0.25)" }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12 transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-red-300 bg-red-500/10 border border-red-500/25 hover:bg-red-500/18 hover:border-red-400/40 hover:text-red-200 transition-all duration-200"
             >
-              <LogOut className="h-4 w-4 text-white/50" />
+              <LogOut className="h-4 w-4 text-red-400" />
               Sign out
             </motion.a>
           ) : (
+            /* Sign-in: sky-blue, prominent call-to-action */
             <motion.a
               href="/auth/login"
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(56,189,248,0.3)" }}
