@@ -13,6 +13,9 @@ interface Fish {
   // rush-to-cursor state
   rushing: boolean;
   rushLife: number;
+  // wandering state
+  wanderAngle: number;
+  wanderTimer: number;
 }
 
 interface Bubble {
@@ -106,18 +109,23 @@ export function FishCanvas() {
     ro.observe(canvas);
 
     // Spawn fish inside the canvas bounds
-    fishRef.current = Array.from({ length: COUNT }, (_, i) => ({
-      x: 80 + Math.random() * (canvas.width - 160),
-      y: 60 + Math.random() * (canvas.height - 120),
-      vx: (Math.random() - 0.5) * 1.2,
-      vy: (Math.random() - 0.5) * 1.2,
-      size: 20 + Math.random() * 16,
-      color: FISH_COLORS[i % FISH_COLORS.length],
-      angle: Math.random() * Math.PI * 2,
-      wobble: Math.random() * Math.PI * 2,
-      rushing: false,
-      rushLife: 0,
-    }));
+    fishRef.current = Array.from({ length: COUNT }, (_, i) => {
+      const wanderAngle = Math.random() * Math.PI * 2;
+      return {
+        x: 80 + Math.random() * (canvas.width - 160),
+        y: 60 + Math.random() * (canvas.height - 120),
+        vx: Math.cos(wanderAngle) * 0.8,
+        vy: Math.sin(wanderAngle) * 0.8,
+        size: 20 + Math.random() * 16,
+        color: FISH_COLORS[i % FISH_COLORS.length],
+        angle: wanderAngle,
+        wobble: Math.random() * Math.PI * 2,
+        rushing: false,
+        rushLife: 0,
+        wanderAngle,
+        wanderTimer: 60 + Math.random() * 120,
+      };
+    });
 
     const onMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -216,42 +224,68 @@ export function FishCanvas() {
           if (speed > 4) { fish.vx = (fish.vx / speed) * 4; fish.vy = (fish.vy / speed) * 4; }
           if (fish.rushLife <= 0 || dist < 15) { fish.rushing = false; }
         } else {
-          // Independent wandering. Two forces at play here:
-          //
-          //   1. Random nudge — ±0.15 per axis, large enough to actually
-          //      rotate a fish that was already moving at max speed. The
-          //      previous value (0.06) was so small relative to maxSpeed
-          //      (1.4) that a fish which picked up speed from an edge
-          //      bounce would glide in a near-straight line for a full
-          //      second before the nudges could turn it.
-          //
-          //   2. Drag — vx *= 0.985 per frame. Without drag, velocity is
-          //      conserved forever, so edge bounces leave lasting momentum
-          //      and fish favor whatever direction they were already going.
-          //      Light drag pulls them toward stillness, letting the nudge
-          //      dominate and produce real wandering.
-          fish.vx += (Math.random() - 0.5) * 0.3;
-          fish.vy += (Math.random() - 0.5) * 0.3;
-          fish.vx *= 0.985;
-          fish.vy *= 0.985;
+          // Wander with persistent intent. Each fish holds a wanderAngle
+          // that it commits to for 1.3–4 seconds (wanderTimer), then
+          // picks a new angle within ±0.8 rad of its current one. Between
+          // re-picks, the angle drifts mildly (±0.04) for organic curves.
+          // The edge-avoidance block below ALSO rotates wanderAngle when
+          // fish approach a wall, so the targeting stays coherent with
+          // the "get away from that edge" nudge.
+          fish.wanderTimer--;
+          if (fish.wanderTimer <= 0) {
+            fish.wanderAngle += (Math.random() - 0.5) * Math.PI * 0.8;
+            fish.wanderTimer = 80 + Math.random() * 160;
+          }
+          // Gentle drift of wander angle each frame for organic curves
+          fish.wanderAngle += (Math.random() - 0.5) * 0.08;
 
-          // Soft speed cap
+          // Steer toward wander direction
+          const targetVx = Math.cos(fish.wanderAngle) * 0.9;
+          const targetVy = Math.sin(fish.wanderAngle) * 0.9;
+          fish.vx += (targetVx - fish.vx) * 0.03;
+          fish.vy += (targetVy - fish.vy) * 0.03;
+
+          // Enforce minimum speed so fish never look dead
           const speed = Math.sqrt(fish.vx * fish.vx + fish.vy * fish.vy);
+          const minSpeed = 0.4;
           const maxSpeed = 1.4;
-          if (speed > maxSpeed) { fish.vx = (fish.vx / speed) * maxSpeed; fish.vy = (fish.vy / speed) * maxSpeed; }
+          if (speed < minSpeed) {
+            fish.vx = (fish.vx / (speed || 1)) * minSpeed;
+            fish.vy = (fish.vy / (speed || 1)) * minSpeed;
+          } else if (speed > maxSpeed) {
+            fish.vx = (fish.vx / speed) * maxSpeed;
+            fish.vy = (fish.vy / speed) * maxSpeed;
+          }
         }
 
-        // Bounce off canvas edges (with margin = fish size)
-        const margin = fish.size;
-        if (fish.x < margin) { fish.vx += 0.3; }
-        if (fish.x > W - margin) { fish.vx -= 0.3; }
-        if (fish.y < margin) { fish.vy += 0.3; }
-        if (fish.y > H - margin) { fish.vy -= 0.3; }
+        // Smooth edge avoidance — steer away proportionally as fish approach edges
+        const margin = fish.size * 1.5;
+        const avoidZone = margin + 60;
+        if (fish.x < avoidZone) {
+          const urgency = 1 - (fish.x - margin) / (avoidZone - margin);
+          fish.vx += urgency * 0.25;
+          fish.wanderAngle = angleLerp(fish.wanderAngle, 0, urgency * 0.1);
+        }
+        if (fish.x > W - avoidZone) {
+          const urgency = 1 - (W - fish.x - margin) / (avoidZone - margin);
+          fish.vx -= urgency * 0.25;
+          fish.wanderAngle = angleLerp(fish.wanderAngle, Math.PI, urgency * 0.1);
+        }
+        if (fish.y < avoidZone) {
+          const urgency = 1 - (fish.y - margin) / (avoidZone - margin);
+          fish.vy += urgency * 0.25;
+          fish.wanderAngle = angleLerp(fish.wanderAngle, Math.PI / 2, urgency * 0.1);
+        }
+        if (fish.y > H - avoidZone) {
+          const urgency = 1 - (H - fish.y - margin) / (avoidZone - margin);
+          fish.vy -= urgency * 0.25;
+          fish.wanderAngle = angleLerp(fish.wanderAngle, -Math.PI / 2, urgency * 0.1);
+        }
 
         fish.x += fish.vx;
         fish.y += fish.vy;
 
-        // Clamp hard to canvas bounds
+        // Hard clamp as safety net
         fish.x = Math.max(margin, Math.min(W - margin, fish.x));
         fish.y = Math.max(margin, Math.min(H - margin, fish.y));
 
