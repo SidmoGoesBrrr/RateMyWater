@@ -433,7 +433,9 @@ export default function HomePage() {
     try {
       const r = await fetch("/api/water?limit=30&sort=createdAt");
       const data = await r.json();
-      setEntries(data.items ?? []);
+      const items: FeedEntry[] = data.items ?? [];
+      items.sort((a, b) => b.averageScore - a.averageScore);
+      setEntries(items);
     } catch {
       setEntries([]);
     } finally {
@@ -453,7 +455,7 @@ export default function HomePage() {
           ...w,
           _dist: distanceKm(lat, lng, w.coordinates!.lat, w.coordinates!.lng),
         }))
-        .sort((a, b) => a._dist - b._dist);
+        .sort((a, b) => b.averageScore - a.averageScore);
       setEntries(withDist.length > 0 ? withDist : all);
     } catch {
       setEntries([]);
@@ -787,6 +789,21 @@ export default function HomePage() {
             </button>
           </div>
 
+          {/* Rankings headline + refresh */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">Rankings</h2>
+            <button
+              onClick={() =>
+                tab === "global"
+                  ? loadGlobal()
+                  : userPos && loadNearby(userPos.lat, userPos.lng)
+              }
+              className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors"
+            >
+              Refresh ↻
+            </button>
+          </div>
+
           {/* Location error */}
           <AnimatePresence>
             {locationError && tab === "nearby" && (
@@ -851,16 +868,6 @@ export default function HomePage() {
                 return <FeedCard key={entry._id} entry={entry} distKm={dist} />;
               })}
 
-              <button
-                onClick={() =>
-                  tab === "global"
-                    ? loadGlobal()
-                    : userPos && loadNearby(userPos.lat, userPos.lng)
-                }
-                className="rounded-2xl border border-white/8 bg-white/4 hover:bg-white/8 py-3.5 text-sm text-zinc-500 hover:text-zinc-300 transition-all"
-              >
-                Refresh
-              </button>
             </div>
           )}
         </div>
