@@ -1,38 +1,36 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@auth0/nextjs-auth0";
 import {
-  MessageSquare, Plus, ChevronDown, ChevronUp,
-  Send, Droplets, User, X, Tag, LogIn, Loader2,
+  Plus, X, User, Loader2, MapPin, MessageSquare, Star, LogIn,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RATING_META, type WaterRating } from "@/lib/water-types";
+import { WaterComposer, type CreatedWaterBody } from "@/components/WaterComposer";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-interface Reply {
-  body: string;
-  author: string;
-  createdAt: string;
-}
-
-interface Post {
+interface WaterBody {
   _id: string;
-  title: string;
-  body: string;
-  author: string;
-  authorName?: string;
-  authorUserId?: string;
-  waterBodyName?: string;
-  waterBodyId?: string;
-  tags: string[];
-  replies: Reply[];
+  name: string;
+  location: string;
+  type: string;
+  imageUrl: string;
+  description?: string;
+  uploadedBy: string;
+  averageScore: number;
+  totalRatings: number;
+  topRating?: WaterRating;
+  coordinates?: { lat: number; lng: number };
   createdAt: string;
+  commentCount?: number;
 }
 
-interface ForumResponse {
-  posts: Post[];
+interface FeedResponse {
+  items: WaterBody[];
   nextCursor: string | null;
 }
 
@@ -46,285 +44,147 @@ function timeAgo(iso: string) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function displayName(post: Post) {
-  return post.authorName || post.author || "Anonymous";
-}
+// ── Feed card (Reddit-style: title top, image middle, stats bottom) ────────
 
-// ── Post card (inline for Pass 1; extract into ForumPostCard in a later pass) ─
-
-function PostCard({ post }: { post: Post }) {
-  const { user } = useUser();
-  const [expanded, setExpanded] = useState(false);
-  const [replyText, setReplyText] = useState("");
-  const [replies, setReplies] = useState<Reply[]>(post.replies);
-  const [submitting, setSubmitting] = useState(false);
-
-  const submitReply = async () => {
-    if (!replyText.trim() || !user) return;
-    setSubmitting(true);
-    try {
-      const r = await fetch(`/api/forum/${post._id}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: replyText }),
-      });
-      const data = await r.json();
-      if (r.ok) {
-        setReplies(data.replies);
-        setReplyText("");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
+function FeedCard({ water }: { water: WaterBody }) {
+  const topMeta = water.topRating ? RATING_META[water.topRating] : null;
 
   return (
     <motion.article
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-white/8 bg-slate-900/50 overflow-hidden"
+      className="rounded-2xl border border-white/8 bg-slate-900/50 overflow-hidden hover:border-white/15 transition-colors"
     >
-      {/* Header (reddit-style: title up top) */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 text-xs text-zinc-500 mb-2">
+      <Link href={`/water/${water._id}`} className="block">
+        {/* Header row: author + timestamp + location */}
+        <div className="px-4 pt-4 pb-2 flex items-center gap-2 text-xs text-zinc-500">
           <div className="h-6 w-6 rounded-full bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
             <User className="h-3 w-3 text-cyan-500" />
           </div>
-          <span className="text-zinc-400 font-medium">{displayName(post)}</span>
+          <span className="text-zinc-400 font-medium">{water.uploadedBy}</span>
           <span className="text-zinc-700">·</span>
-          <span className="text-zinc-600">{timeAgo(post.createdAt)}</span>
-          {post.waterBodyName && (
-            <>
-              <span className="text-zinc-700">·</span>
-              <Link
-                href={post.waterBodyId ? `/water/${post.waterBodyId}` : "#"}
-                className="text-cyan-600 hover:text-cyan-400 flex items-center gap-0.5"
-              >
-                <Droplets className="h-2.5 w-2.5" />
-                {post.waterBodyName}
-              </Link>
-            </>
-          )}
+          <span className="text-zinc-600">{timeAgo(water.createdAt)}</span>
+          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-600 flex items-center gap-0.5 truncate">
+            <MapPin className="h-2.5 w-2.5 shrink-0" />
+            <span className="truncate">{water.location}</span>
+          </span>
         </div>
 
-        {/* Title */}
-        <h2 className="text-lg font-bold text-white leading-tight mb-2">{post.title}</h2>
+        {/* Title (Reddit-style) */}
+        <h2 className="px-4 pb-3 text-lg font-bold text-white leading-tight">
+          {water.name}
+        </h2>
 
-        {/* Body — collapsed preview unless expanded */}
-        <div
-          className={cn(
-            "text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap",
-            !expanded && "line-clamp-4"
-          )}
-        >
-          {post.body}
-        </div>
-
-        {/* Tags */}
-        {post.tags.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-            {post.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-0.5 text-[10px] rounded-full px-2 py-0.5 border border-white/10 text-zinc-500"
-              >
-                <Tag className="h-2.5 w-2.5" />
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Footer: comments toggle */}
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="mt-4 flex items-center gap-1.5 text-xs text-zinc-500 hover:text-cyan-400 transition-colors"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-          {replies.length === 0
-            ? "Add a comment"
-            : `View ${replies.length} comment${replies.length === 1 ? "" : "s"}`}
-          {expanded ? (
-            <ChevronUp className="h-3 w-3" />
-          ) : (
-            <ChevronDown className="h-3 w-3" />
-          )}
-        </button>
-      </div>
-
-      {/* Expanded comments */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 border-t border-white/5">
-              {replies.length > 0 && (
-                <div className="mt-4 space-y-3">
-                  {replies.map((reply, i) => (
-                    <div key={i} className="flex gap-2.5 pl-3 border-l border-white/8">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-cyan-600">{reply.author}</span>
-                          <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
-                        </div>
-                        <p className="text-xs text-zinc-300 leading-relaxed">{reply.body}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Reply form */}
-              {user ? (
-                <div className="mt-4 flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Add a comment…"
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        submitReply();
-                      }
-                    }}
-                    maxLength={1000}
-                    className="flex-1 rounded-xl bg-slate-800/60 border border-white/8 px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/40 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={submitReply}
-                    disabled={!replyText.trim() || submitting}
-                    className="flex-shrink-0 h-9 w-9 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 hover:bg-cyan-500/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <a
-                  href="/auth/login?returnTo=/forum"
-                  className="mt-4 flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-colors"
-                >
-                  <LogIn className="h-3.5 w-3.5" />
-                  Sign in to comment
-                </a>
-              )}
+        {/* Image */}
+        <div className="relative w-full aspect-[4/3] bg-slate-950">
+          <Image
+            src={water.imageUrl}
+            alt={water.name}
+            fill
+            sizes="(max-width: 672px) 100vw, 672px"
+            className="object-cover"
+          />
+          {/* Top rating badge overlaid on image */}
+          {topMeta && (
+            <div
+              className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold backdrop-blur-md"
+              style={{
+                backgroundColor: `${topMeta.color}20`,
+                borderColor: `${topMeta.color}50`,
+                borderWidth: 1,
+                color: topMeta.color,
+              }}
+            >
+              <span>{topMeta.emoji}</span>
+              <span>{topMeta.label}</span>
             </div>
-          </motion.div>
+          )}
+        </div>
+
+        {/* Description preview */}
+        {water.description && (
+          <p className="px-4 pt-3 text-sm text-zinc-300 line-clamp-2 leading-relaxed">
+            {water.description}
+          </p>
         )}
-      </AnimatePresence>
+
+        {/* Stats footer: ratings + comments */}
+        <div className="px-4 py-3 flex items-center gap-5 text-xs text-zinc-500 border-t border-white/5 mt-3">
+          <span className="flex items-center gap-1.5">
+            <Star className="h-3.5 w-3.5 text-cyan-500" />
+            <span className="text-zinc-400 font-semibold">
+              {water.totalRatings}
+            </span>
+            <span>{water.totalRatings === 1 ? "rating" : "ratings"}</span>
+            {water.totalRatings > 0 && (
+              <span className="text-zinc-600 ml-0.5">
+                · {water.averageScore.toFixed(1)}/5
+              </span>
+            )}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageSquare className="h-3.5 w-3.5 text-cyan-500" />
+            <span className="text-zinc-400 font-semibold">
+              {water.commentCount ?? 0}
+            </span>
+            <span>{water.commentCount === 1 ? "comment" : "comments"}</span>
+          </span>
+        </div>
+      </Link>
     </motion.article>
   );
 }
 
-// ── Composer modal ─────────────────────────────────────────────────────────
+// ── Composer modal wrapper ─────────────────────────────────────────────────
 
-function Composer({
+function ComposerModal({
   open,
   onClose,
-  onPosted,
+  onSubmitted,
+  defaultAuthorName,
 }: {
   open: boolean;
   onClose: () => void;
-  onPosted: (post: Post) => void;
+  onSubmitted: (water: CreatedWaterBody) => void;
+  defaultAuthorName?: string;
 }) {
-  const [form, setForm] = useState({ title: "", body: "", tags: "" });
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim() || !form.body.trim()) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      const r = await fetch("/api/forum", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: form.title,
-          body: form.body,
-          tags: form.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-            .slice(0, 5),
-        }),
-      });
-      if (!r.ok) {
-        if (r.status === 401) {
-          window.location.href = "/auth/login?returnTo=/forum";
-          return;
-        }
-        const data = await r.json().catch(() => ({}));
-        setError(data.error ?? "Failed to post");
-        return;
-      }
-      const post = (await r.json()) as Post;
-      onPosted(post);
-      setForm({ title: "", body: "", tags: "" });
-      onClose();
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
     <AnimatePresence>
       {open && (
-        <motion.form
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
-          onSubmit={submit}
-          className="mb-6 rounded-2xl border border-cyan-500/20 bg-slate-900/60 p-4 space-y-3"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-start justify-center p-4 md:p-8 bg-black/70 backdrop-blur-sm overflow-y-auto"
+          onClick={onClose}
         >
-          <h3 className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Start a Discussion
-          </h3>
-          <input
-            type="text"
-            placeholder="Title *"
-            value={form.title}
-            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            maxLength={150}
-            required
-            className="w-full rounded-xl bg-slate-800/60 border border-white/8 px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/40 transition-all"
-          />
-          <textarea
-            placeholder="What's on your mind? *"
-            value={form.body}
-            onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-            maxLength={2000}
-            rows={4}
-            required
-            className="w-full rounded-xl bg-slate-800/60 border border-white/8 px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/40 transition-all resize-none"
-          />
-          <input
-            type="text"
-            placeholder="Tags (comma-separated)"
-            value={form.tags}
-            onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
-            className="w-full rounded-xl bg-slate-800/60 border border-white/8 px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/40 transition-all"
-          />
-          {error && <p className="text-xs text-red-400">{error}</p>}
-          <button
-            type="submit"
-            disabled={submitting || !form.title.trim() || !form.body.trim()}
-            className="flex items-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-5 py-2.5 text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.98 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-xl rounded-2xl border border-cyan-500/20 bg-[#060d1f] p-5 shadow-2xl shadow-cyan-500/10 my-8"
           >
-            <Send className="h-4 w-4" />
-            {submitting ? "Posting…" : "Post Discussion"}
-          </button>
-        </motion.form>
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-4 right-4 h-9 w-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4 text-zinc-400" />
+            </button>
+            <h2 className="text-xl font-black text-white mb-1">Submit Water</h2>
+            <p className="text-xs text-zinc-500 mb-5">
+              Help the community know what they&apos;re getting into.
+            </p>
+            <WaterComposer
+              defaultAuthorName={defaultAuthorName}
+              onSubmitted={onSubmitted}
+            />
+          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
@@ -334,7 +194,7 @@ function Composer({
 
 export default function ForumPage() {
   const { user, isLoading: userLoading } = useUser();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [items, setItems] = useState<WaterBody[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -349,13 +209,12 @@ export default function ForumPage() {
     try {
       const params = new URLSearchParams({ limit: "15" });
       if (cursor) params.set("cursor", cursor);
-      const r = await fetch(`/api/forum?${params.toString()}`);
+      const r = await fetch(`/api/water?${params.toString()}`);
       if (!r.ok) throw new Error("fetch failed");
-      const data: ForumResponse = await r.json();
-      setPosts((prev) => {
-        // Dedupe by _id in case of overlap during rapid prepends.
+      const data: FeedResponse = await r.json();
+      setItems((prev) => {
         const seen = new Set(prev.map((p) => p._id));
-        const fresh = data.posts.filter((p) => !seen.has(p._id));
+        const fresh = data.items.filter((p) => !seen.has(p._id));
         return [...prev, ...fresh];
       });
       setCursor(data.nextCursor);
@@ -370,12 +229,7 @@ export default function ForumPage() {
 
   // Initial load.
   useEffect(() => {
-    if (!initialLoaded) {
-      loadMore();
-    }
-    // Intentionally only runs once on mount — loadMore's own guards handle
-    // re-entry, and we don't want the initial fetch to re-fire every time
-    // loadMore changes identity.
+    if (!initialLoaded) loadMore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -385,9 +239,7 @@ export default function ForumPage() {
     if (!el) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
+        if (entries[0]?.isIntersecting) loadMore();
       },
       { rootMargin: "800px" }
     );
@@ -401,11 +253,12 @@ export default function ForumPage() {
       window.location.href = "/auth/login?returnTo=/forum";
       return;
     }
-    setComposing((v) => !v);
+    setComposing(true);
   };
 
-  const handlePosted = (post: Post) => {
-    setPosts((prev) => [post, ...prev]);
+  const handleSubmitted = (water: CreatedWaterBody) => {
+    setItems((prev) => [water as unknown as WaterBody, ...prev]);
+    setComposing(false);
   };
 
   return (
@@ -414,75 +267,87 @@ export default function ForumPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-black text-white">Forum</h1>
+            <h1 className="text-2xl font-black text-white">Feed</h1>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Discuss water quality, share tips, ask questions
+              Fresh water bodies, freshly rated
             </p>
           </div>
           <button
             type="button"
             onClick={handleNewPostClick}
-            className={cn(
-              "flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all",
-              composing
-                ? "bg-white/10 text-white"
-                : "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25"
-            )}
+            className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25"
           >
-            {composing ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {composing ? "Cancel" : "New Post"}
+            <Plus className="h-4 w-4" />
+            Submit Water
           </button>
         </div>
 
-        {/* Composer (only mounted when user is authed) */}
-        {user && (
-          <Composer
-            open={composing}
-            onClose={() => setComposing(false)}
-            onPosted={handlePosted}
-          />
+        {/* Unauthenticated CTA */}
+        {!userLoading && !user && (
+          <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-slate-900/40 px-4 py-3">
+            <p className="text-xs text-zinc-400">
+              Sign in to submit water bodies and rate them.
+            </p>
+            <a
+              href="/auth/login?returnTo=/forum"
+              className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+            >
+              <LogIn className="h-3.5 w-3.5" />
+              Sign in
+            </a>
+          </div>
         )}
 
-        {/* Posts */}
+        {/* Composer modal */}
+        <ComposerModal
+          open={composing}
+          onClose={() => setComposing(false)}
+          onSubmitted={handleSubmitted}
+          defaultAuthorName={user?.name ?? undefined}
+        />
+
+        {/* Feed */}
         {!initialLoaded ? (
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-36 rounded-2xl bg-slate-900/50 border border-white/5 animate-pulse"
+                className="h-96 rounded-2xl bg-slate-900/50 border border-white/5 animate-pulse"
               />
             ))}
           </div>
-        ) : posts.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">💬</div>
-            <h3 className="text-lg font-bold text-white">No discussions yet</h3>
-            <p className="mt-2 text-zinc-500 text-sm mb-6">Start the conversation!</p>
+            <div className="text-5xl mb-4">💧</div>
+            <h3 className="text-lg font-bold text-white">No water yet</h3>
+            <p className="mt-2 text-zinc-500 text-sm mb-6">
+              Be the first to submit a water body!
+            </p>
             <button
               type="button"
               onClick={handleNewPostClick}
               className="inline-flex items-center gap-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-semibold px-5 py-2.5 text-sm hover:bg-cyan-500/25 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              New Post
+              Submit Water
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            {posts.map((post) => (
-              <PostCard key={post._id} post={post} />
+          <div className="flex flex-col gap-4">
+            {items.map((water) => (
+              <FeedCard key={water._id} water={water} />
             ))}
           </div>
         )}
 
-        {/* Infinite-scroll sentinel + loading indicator */}
+        {/* Infinite-scroll sentinel */}
         {initialLoaded && hasMore && (
           <div ref={sentinelRef} className="flex items-center justify-center py-8">
             {loading && <Loader2 className="h-5 w-5 text-cyan-500 animate-spin" />}
           </div>
         )}
 
-        {initialLoaded && !hasMore && posts.length > 0 && (
+        {initialLoaded && !hasMore && items.length > 0 && (
           <p className="text-center text-xs text-zinc-600 py-8">
             You&apos;ve reached the bottom.
           </p>
