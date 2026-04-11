@@ -138,6 +138,7 @@ function RatingCommentCard({ entry, index }: { entry: RatingEntry; index: number
 function RecommendationCard({ rec, index }: { rec: RecommendedWater; index: number }) {
   const { icon: Icon, color } = TYPE_ICONS[rec.type] ?? DEFAULT_TYPE_ICON;
   const isCollaborative = rec.reason === "collaborative";
+  const topMeta = rec.topRating ? RATING_META[rec.topRating] : null;
 
   return (
     <motion.div
@@ -145,52 +146,75 @@ function RecommendationCard({ rec, index }: { rec: RecommendedWater; index: numb
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.07, type: "spring", stiffness: 280, damping: 22 }}
       whileHover={{ y: -3, scale: 1.02 }}
-      className="flex-shrink-0 w-48 rounded-2xl border border-white/8 bg-slate-900/70 overflow-hidden cursor-pointer"
+      className="flex-shrink-0 w-44 h-[200px] rounded-2xl border border-white/8 bg-slate-900/70 overflow-hidden cursor-pointer"
     >
-      <Link href={`/water/${rec._id}`} className="block">
-        <div className="relative h-28 overflow-hidden">
+      <Link href={`/water/${rec._id}`} className="flex flex-col h-full">
+        {/* Image — compact */}
+        <div className="relative h-[84px] shrink-0 overflow-hidden">
           <Image
             src={rec.imageUrl}
             alt={rec.name}
             fill
             className="object-cover transition-transform duration-500 hover:scale-105"
-            sizes="192px"
+            sizes="176px"
           />
-          <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/60" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/50" />
           {/* Reason chip */}
           <div
-            className="absolute top-2 left-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold backdrop-blur-sm border"
+            className="absolute top-1.5 left-1.5 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold backdrop-blur-sm border"
             style={{
               color: isCollaborative ? "#22d3ee" : "#a78bfa",
               borderColor: isCollaborative ? "rgba(34,211,238,0.3)" : "rgba(167,139,250,0.3)",
-              backgroundColor: isCollaborative ? "rgba(34,211,238,0.12)" : "rgba(167,139,250,0.12)",
+              backgroundColor: isCollaborative ? "rgba(34,211,238,0.15)" : "rgba(167,139,250,0.15)",
             }}
           >
             {isCollaborative
-              ? <><Users className="h-2.5 w-2.5" /> {rec.sharedRaters} shared</>
-              : <><Sparkles className="h-2.5 w-2.5" /> Similar</>
+              ? <><Users className="h-2 w-2" /> {rec.sharedRaters}</>
+              : <><Sparkles className="h-2 w-2" /> Similar</>
             }
           </div>
-          {/* Score badge */}
-          <div className="absolute bottom-2 right-2 rounded-full bg-black/60 backdrop-blur-sm px-2 py-0.5 text-xs font-bold text-white tabular-nums">
+          {/* Score */}
+          <div className="absolute bottom-1.5 right-1.5 rounded-full bg-black/70 backdrop-blur-sm px-1.5 py-0.5 text-[11px] font-black text-white tabular-nums">
             {rec.averageScore.toFixed(1)}
           </div>
         </div>
-        <div className="p-3">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Icon className="h-3 w-3 shrink-0" style={{ color }} />
-            <span className="text-[10px] text-zinc-500 capitalize">{rec.type}</span>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 px-3 pt-2.5 pb-2 min-h-0">
+          {/* Name + type inline */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[13px] font-bold text-white leading-tight line-clamp-1 shrink">{rec.name}</p>
+            <div className="flex items-center gap-1 shrink-0">
+              <Icon className="h-3 w-3 shrink-0" style={{ color }} />
+              <span className="text-[10px] text-zinc-500 capitalize">{rec.type}</span>
+            </div>
           </div>
-          <p className="text-sm font-semibold text-white leading-tight line-clamp-1">{rec.name}</p>
-          <p className="text-xs text-zinc-500 mt-0.5 line-clamp-1 flex items-center gap-1">
-            <MapPin className="h-2.5 w-2.5 shrink-0" />
+
+          {/* Location */}
+          <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1 flex items-center gap-1">
+            <MapPin className="h-2.5 w-2.5 shrink-0 text-zinc-500" />
             {rec.location}
           </p>
-          {rec.topRating && (
-            <div className="mt-2">
-              <RatingBadge rating={rec.topRating} />
-            </div>
-          )}
+
+          {/* Full-width rating tag at bottom */}
+          <div className="mt-auto pt-2">
+            {topMeta ? (
+              <div
+                className="w-full rounded-lg px-2 py-1 text-[10px] font-semibold text-center border"
+                style={{
+                  color: topMeta.color,
+                  borderColor: `${topMeta.color}40`,
+                  backgroundColor: `${topMeta.color}10`,
+                }}
+              >
+                {topMeta.label}
+              </div>
+            ) : (
+              <div className="w-full rounded-lg px-2 py-1 text-[10px] text-zinc-600 text-center border border-white/5 bg-white/3">
+                No ratings yet
+              </div>
+            )}
+          </div>
         </div>
       </Link>
     </motion.div>
@@ -232,7 +256,7 @@ function RecommendationsSection({ waterId }: { waterId: string }) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-48 h-[212px] rounded-2xl border border-white/8 bg-slate-900/40 animate-pulse"
+              className="flex-shrink-0 w-44 h-[200px] rounded-2xl border border-white/8 bg-slate-900/40 animate-pulse"
             />
           ))}
         </div>
