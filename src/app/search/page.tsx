@@ -173,7 +173,7 @@ export default function SearchPage() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search water bodies, locations, users…"
               autoFocus
-              className="w-full rounded-2xl bg-white/6 border border-white/8 pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400/40 focus:bg-white/9 transition-all"
+              className="w-full rounded-2xl bg-white/6 border border-white/8 pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-sky-400/40 focus:bg-white/9 transition-all"
             />
             <AnimatePresence>
               {query && (
@@ -199,7 +199,7 @@ export default function SearchPage() {
                 className={cn(
                   "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200",
                   typeFilter === value
-                    ? "border-cyan-400/50 bg-cyan-500/20 text-cyan-200 shadow-sm shadow-cyan-500/10"
+                    ? "border-sky-400/50 bg-sky-500/20 text-sky-200 shadow-sm shadow-sky-500/10"
                     : "border-white/8 bg-white/4 text-zinc-400 hover:border-white/18 hover:text-white hover:bg-white/8"
                 )}
               >

@@ -37,8 +37,8 @@ export function Navbar() {
             >
               💧
             </motion.span>
-            <span className="text-base font-black tracking-tight text-white group-hover:text-cyan-100 transition-colors">
-              Rate<span className="text-cyan-400">My</span>Water
+            <span className="text-base font-black tracking-tight text-white group-hover:text-sky-100 transition-colors">
+              Rate<span className="text-sky-400">My</span>Water
             </span>
           </Link>
         </motion.div>
@@ -61,7 +61,7 @@ export function Navbar() {
                   className={cn(
                     "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200",
                     active
-                      ? "text-cyan-100 bg-cyan-500/18 border border-cyan-400/30 shadow-sm shadow-cyan-500/10"
+                      ? "text-sky-100 bg-sky-500/18 border border-sky-400/30 shadow-sm shadow-sky-500/10"
                       : "text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12"
                   )}
                 >
@@ -69,13 +69,13 @@ export function Navbar() {
                     animate={active ? { rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] } : {}}
                     transition={{ duration: 0.4 }}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-cyan-400" : "text-white/50")} />
+                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-sky-400" : "text-white/50")} />
                   </motion.div>
                   {label}
                   {active && (
                     <motion.div
                       layoutId="desktop-active"
-                      className="absolute inset-0 rounded-xl bg-cyan-500/12 border border-cyan-400/25"
+                      className="absolute inset-0 rounded-xl bg-sky-500/12 border border-sky-400/25"
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -100,15 +100,15 @@ export function Navbar() {
           ) : (
             <motion.a
               href="/auth/login"
-              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(34,211,238,0.3)" }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(56,189,248,0.3)" }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-cyan-100 bg-cyan-500/18 border border-cyan-400/30 hover:bg-cyan-500/25 transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-sky-100 bg-sky-500/18 border border-sky-400/30 hover:bg-sky-500/25 transition-all duration-200"
             >
               <motion.div
                 animate={{ x: [0, 3, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
               >
-                <LogIn className="h-4 w-4 text-cyan-400" />
+                <LogIn className="h-4 w-4 text-sky-400" />
               </motion.div>
               Sign in
             </motion.a>
@@ -139,7 +139,7 @@ export function Navbar() {
                   {active && (
                     <motion.div
                       layoutId="mobile-active"
-                      className="absolute inset-0 rounded-xl bg-cyan-500/15 border border-cyan-500/20"
+                      className="absolute inset-0 rounded-xl bg-sky-500/15 border border-sky-500/20"
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -150,14 +150,14 @@ export function Navbar() {
                     <Icon
                       className={cn(
                         "h-5 w-5 relative z-10 transition-colors",
-                        active ? "text-cyan-400" : "text-white/40"
+                        active ? "text-sky-400" : "text-white/40"
                       )}
                     />
                   </motion.div>
                   <span
                     className={cn(
                       "text-[10px] font-semibold relative z-10 transition-colors",
-                      active ? "text-cyan-300" : "text-white/40"
+                      active ? "text-sky-300" : "text-white/40"
                     )}
                   >
                     {label}
@@ -173,30 +173,30 @@ export function Navbar() {
               href="/upload"
               className={cn(
                 "relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl",
-                pathname === "/upload" && "after:absolute after:inset-0 after:rounded-xl after:bg-cyan-500/10"
+                pathname === "/upload" && "after:absolute after:inset-0 after:rounded-xl after:bg-sky-500/10"
               )}
             >
               <motion.div
                 className={cn(
                   "h-8 w-8 rounded-xl flex items-center justify-center transition-all",
                   pathname === "/upload"
-                    ? "bg-cyan-500 shadow-lg shadow-cyan-500/30"
-                    : "bg-cyan-500/25 border border-cyan-500/35"
+                    ? "bg-sky-500 shadow-lg shadow-sky-500/30"
+                    : "bg-sky-500/25 border border-sky-500/35"
                 )}
-                animate={pathname === "/upload" ? { boxShadow: ["0 0 10px rgba(34,211,238,0.3)", "0 0 20px rgba(34,211,238,0.6)", "0 0 10px rgba(34,211,238,0.3)"] } : {}}
+                animate={pathname === "/upload" ? { boxShadow: ["0 0 10px rgba(56,189,248,0.3)", "0 0 20px rgba(56,189,248,0.6)", "0 0 10px rgba(56,189,248,0.3)"] } : {}}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
                 <Plus
                   className={cn(
                     "h-4 w-4",
-                    pathname === "/upload" ? "text-black" : "text-cyan-300"
+                    pathname === "/upload" ? "text-black" : "text-sky-300"
                   )}
                 />
               </motion.div>
               <span
                 className={cn(
                   "text-[10px] font-semibold transition-colors",
-                  pathname === "/upload" ? "text-cyan-400" : "text-white/40"
+                  pathname === "/upload" ? "text-sky-400" : "text-white/40"
                 )}
               >
                 Submit

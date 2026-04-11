@@ -42,7 +42,7 @@ function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): num
 }
 
 function getScoreColor(score: number) {
-  if (score >= 4.5) return "#22d3ee";
+  if (score >= 4.5) return "#38bdf8";
   if (score >= 3.5) return "#34d399";
   if (score >= 2.5) return "#fbbf24";
   if (score >= 1.5) return "#f97316";
@@ -107,7 +107,7 @@ function AnimatedWaterDrop() {
         <path
           d="M38 5 C38 5 9 38 9 60 A29 29 0 0 0 67 60 C67 38 38 5 38 5 Z"
           fill="none"
-          stroke="#22d3ee"
+          stroke="#38bdf8"
           strokeWidth="1.5"
           strokeOpacity="0.75"
           filter="url(#drop-glow)"
@@ -121,21 +121,36 @@ function AnimatedWaterDrop() {
 }
 
 function OceanFloor() {
+  const fish = [
+    { bottom: 60,  dir: "r", dur: 20, delay: 0,   w: 46, h: 22, color: "96,185,255"  },
+    { bottom: 100, dir: "l", dur: 23, delay: 3,   w: 54, h: 26, color: "56,200,248"  },
+    { bottom: 140, dir: "r", dur: 18, delay: 6,   w: 42, h: 20, color: "134,220,180" },
+    { bottom: 180, dir: "l", dur: 25, delay: 1,   w: 50, h: 24, color: "120,180,255" },
+    { bottom: 220, dir: "r", dur: 21, delay: 9,   w: 48, h: 22, color: "80,210,220"  },
+    { bottom: 260, dir: "l", dur: 17, delay: 5,   w: 44, h: 20, color: "96,160,250"  },
+    { bottom: 80,  dir: "l", dur: 22, delay: 12,  w: 40, h: 18, color: "70,190,240"  },
+    { bottom: 160, dir: "r", dur: 19, delay: 8,   w: 52, h: 24, color: "100,200,230" },
+    { bottom: 240, dir: "l", dur: 24, delay: 2,   w: 38, h: 16, color: "140,230,200" },
+    { bottom: 120, dir: "r", dur: 16, delay: 11,  w: 56, h: 26, color: "80,170,255"  },
+    { bottom: 200, dir: "l", dur: 26, delay: 7,   w: 44, h: 20, color: "60,180,250"  },
+    { bottom: 280, dir: "r", dur: 20, delay: 4,   w: 40, h: 18, color: "120,230,210" },
+  ];
+
   const bubbles = [
-    { left: "3%",  bottom: 90,  size: 6, delay: "0s",   dur: "4.5s" },
-    { left: "8%",  bottom: 70,  size: 4, delay: "1.4s", dur: "3.5s" },
-    { left: "14%", bottom: 100, size: 8, delay: "0.6s", dur: "5.5s" },
-    { left: "20%", bottom: 75,  size: 5, delay: "2.2s", dur: "4.5s" },
-    { left: "28%", bottom: 88,  size: 6, delay: "1s",   dur: "4.2s" },
-    { left: "35%", bottom: 80,  size: 5, delay: "3s",   dur: "4s" },
-    { left: "42%", bottom: 95,  size: 7, delay: "0.3s", dur: "5s" },
-    { left: "50%", bottom: 70,  size: 4, delay: "2s",   dur: "3.8s" },
-    { left: "58%", bottom: 85,  size: 6, delay: "1.2s", dur: "4.3s" },
-    { left: "65%", bottom: 78,  size: 5, delay: "0.8s", dur: "4.6s" },
-    { left: "72%", bottom: 92,  size: 8, delay: "2.5s", dur: "5.2s" },
-    { left: "80%", bottom: 68,  size: 4, delay: "1.8s", dur: "4.1s" },
-    { left: "87%", bottom: 85,  size: 6, delay: "0.5s", dur: "4.4s" },
-    { left: "95%", bottom: 75,  size: 5, delay: "3.2s", dur: "3.9s" },
+    { left: "3%",  bottom: 90,  size: 16, delay: "0s",   dur: "4.5s" },
+    { left: "8%",  bottom: 70,  size: 11, delay: "1.4s", dur: "3.5s" },
+    { left: "14%", bottom: 100, size: 20, delay: "0.6s", dur: "5.5s" },
+    { left: "20%", bottom: 75,  size: 14, delay: "2.2s", dur: "4.5s" },
+    { left: "28%", bottom: 88,  size: 17, delay: "1s",   dur: "4.2s" },
+    { left: "35%", bottom: 80,  size: 12, delay: "3s",   dur: "4s" },
+    { left: "42%", bottom: 95,  size: 18, delay: "0.3s", dur: "5s" },
+    { left: "50%", bottom: 70,  size: 11, delay: "2s",   dur: "3.8s" },
+    { left: "58%", bottom: 85,  size: 15, delay: "1.2s", dur: "4.3s" },
+    { left: "65%", bottom: 78,  size: 13, delay: "0.8s", dur: "4.6s" },
+    { left: "72%", bottom: 92,  size: 22, delay: "2.5s", dur: "5.2s" },
+    { left: "80%", bottom: 68,  size: 10, delay: "1.8s", dur: "4.1s" },
+    { left: "87%", bottom: 85,  size: 16, delay: "0.5s", dur: "4.4s" },
+    { left: "95%", bottom: 75,  size: 12, delay: "3.2s", dur: "3.9s" },
   ];
 
   const jellies = [
@@ -152,7 +167,9 @@ function OceanFloor() {
         @keyframes wave-1     { from{transform:translateX(0)}   to{transform:translateX(-50%)} }
         @keyframes wave-2     { from{transform:translateX(-50%)} to{transform:translateX(0)} }
         @keyframes wave-3     { from{transform:translateX(-25%)} to{transform:translateX(-75%)} }
-        @keyframes bubble-up  { 0%{transform:translateY(0);opacity:0.65} 100%{transform:translateY(-200px);opacity:0} }
+        @keyframes bubble-up  { 0%{transform:translateY(0);opacity:0.85} 100%{transform:translateY(-260px);opacity:0} }
+        @keyframes fish-r     { 0%{transform:translateX(-120px) scaleX(-1)} 100%{transform:translateX(110vw) scaleX(-1)} }
+        @keyframes fish-l     { 0%{transform:translateX(110vw) scaleX(1)}  100%{transform:translateX(-120px) scaleX(1)} }
         @keyframes jelly-drift { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
         @keyframes jelly-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
         @keyframes jelly-halo  { 0%,100%{opacity:0.25;transform:scale(1)} 50%{opacity:0.55;transform:scale(1.12)} }
@@ -221,16 +238,38 @@ function OceanFloor() {
       {bubbles.map((b, i) => (
         <div
           key={`bub-${i}`}
-          className="absolute rounded-full border"
+          className="absolute rounded-full"
           style={{
             left: b.left,
             bottom: b.bottom,
             width: b.size,
             height: b.size,
-            borderColor: "rgba(165,225,250,0.5)",
+            backgroundColor: "rgba(165,225,250,0.15)",
+            border: "1.5px solid rgba(165,225,250,0.6)",
+            boxShadow: "0 0 6px rgba(130,210,245,0.35), inset 0 0 3px rgba(255,255,255,0.12)",
             animation: `bubble-up ${b.dur} ease-in infinite ${b.delay}`,
           }}
         />
+      ))}
+
+      {/* ══════ FISH ══════ */}
+      {fish.map((f, i) => (
+        <div
+          key={`fish-${i}`}
+          className="absolute"
+          style={{
+            bottom: `${f.bottom}px`,
+            [f.dir === "r" ? "left" : "right"]: "-120px",
+            animation: `fish-${f.dir} ${f.dur}s linear infinite ${f.delay}s`,
+          }}
+        >
+          <svg width={f.w} height={f.h} viewBox={`0 0 ${f.w} ${f.h}`} fill="none" opacity="0.6">
+            <path d={`M${f.w * 0.75} ${f.h / 2} L${f.w} ${f.h * 0.15} L${f.w} ${f.h * 0.85} Z`} fill={`rgba(${f.color},0.7)`} />
+            <ellipse cx={f.w * 0.46} cy={f.h / 2} rx={f.w * 0.3} ry={f.h * 0.38} fill={`rgba(${f.color},0.7)`} />
+            <circle cx={f.w * 0.24} cy={f.h * 0.44} r={f.h * 0.1} fill="white" />
+            <circle cx={f.w * 0.26} cy={f.h * 0.44} r={f.h * 0.06} fill="#0c2d5e" />
+          </svg>
+        </div>
       ))}
 
       {/* ══════ WAVE LAYERS — deep ocean ══════ */}
@@ -304,7 +343,7 @@ function FeedCard({ entry, distKm: dist }: { entry: FeedEntry; distKm?: number }
       transition={{ duration: 0.3 }}
     >
       <Link href={`/water/${entry._id}`}>
-        <div className="group flex gap-4 rounded-2xl border border-white/8 bg-linear-to-br from-slate-900/70 to-slate-900/30 p-4 hover:border-cyan-500/20 hover:from-slate-900/90 transition-all duration-200 backdrop-blur-sm">
+        <div className="group flex gap-4 rounded-2xl border border-white/8 bg-linear-to-br from-slate-900/70 to-slate-900/30 p-4 hover:border-sky-500/20 hover:from-slate-900/90 transition-all duration-200 backdrop-blur-sm">
           {/* Thumbnail */}
           <div className="relative h-20 w-28 shrink-0 rounded-xl overflow-hidden">
             <Image
@@ -323,7 +362,7 @@ function FeedCard({ entry, distKm: dist }: { entry: FeedEntry; distKm?: number }
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h3 className="font-bold text-white text-sm leading-tight truncate group-hover:text-cyan-100 transition-colors">
+                <h3 className="font-bold text-white text-sm leading-tight truncate group-hover:text-sky-100 transition-colors">
                   {entry.name}
                 </h3>
                 <p className="text-xs text-zinc-500 truncate mt-0.5">{entry.location}</p>
@@ -359,7 +398,7 @@ function FeedCard({ entry, distKm: dist }: { entry: FeedEntry; distKm?: number }
                 <span>{entry.totalRatings} rating{entry.totalRatings !== 1 ? "s" : ""}</span>
               )}
               {dist !== undefined && (
-                <span className="text-cyan-700/80">
+                <span className="text-sky-600/80">
                   {dist < 1 ? `${Math.round(dist * 1000)}m away` : `${dist.toFixed(1)}km away`}
                 </span>
               )}
@@ -452,13 +491,13 @@ export default function HomePage() {
       </AnimatePresence>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-14 min-h-[88vh] flex flex-col justify-center">
+      <section className="relative overflow-hidden pt-14 min-h-screen flex flex-col justify-center">
         {/* Expanding ripple rings */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {[0, 1, 2, 3, 4].map((i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full border border-cyan-400/10"
+              className="absolute rounded-full border border-sky-400/10"
               initial={{ width: 60, height: 60, opacity: 0.6 }}
               animate={{ width: 560 + i * 130, height: 560 + i * 130, opacity: 0 }}
               transition={{ duration: 6, repeat: Infinity, delay: i * 1.2, ease: "linear" }}
@@ -470,7 +509,7 @@ export default function HomePage() {
         <OceanFloor />
 
         {/* Background water glow blobs */}
-        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-cyan-400/12 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/3 w-80 h-80 bg-sky-400/12 rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/6 w-48 h-48 bg-teal-400/8 rounded-full blur-2xl" />
 
@@ -492,21 +531,16 @@ export default function HomePage() {
             transition={{ delay: 0.25, duration: 0.6 }}
             className="text-5xl md:text-7xl font-black tracking-tight leading-[0.95]"
           >
-            Rate<span className="text-cyan-400">My</span>
-            <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-blue-300 to-teal-400">
-              Water
-            </span>
+            Rate<span className="text-sky-400">My</span><span className="text-transparent bg-clip-text bg-linear-to-r from-sky-400 via-blue-300 to-teal-400">Water</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-5 text-zinc-400 text-base md:text-lg max-w-md mx-auto leading-relaxed"
+            className="mt-5 text-sky-200/80 text-lg md:text-xl font-medium tracking-wide max-w-md mx-auto leading-relaxed"
           >
-            From dive-in-with-mouth-open perfection to full biohazard speedruns —
-            the world&apos;s water bodies, rated.
+            Rigorously unscientific water reviews.
           </motion.p>
 
           {/* ── SUBMIT WATER — big glowing CTA ── */}
@@ -518,8 +552,8 @@ export default function HomePage() {
           >
             <Link href="/upload" className="relative group w-full sm:w-auto">
               {/* Glow halo */}
-              <div className="absolute -inset-1.5 rounded-[20px] bg-cyan-500/35 blur-xl group-hover:bg-cyan-400/55 transition-all duration-300" />
-              <div className="relative flex items-center justify-center gap-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xl px-12 py-5 transition-all hover:scale-[1.03] shadow-2xl shadow-cyan-500/40 w-full">
+              <div className="absolute -inset-1.5 rounded-[20px] bg-sky-500/35 blur-xl group-hover:bg-sky-400/55 transition-all duration-300" />
+              <div className="relative flex items-center justify-center gap-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-black font-black text-xl px-12 py-5 transition-all hover:scale-[1.03] shadow-2xl shadow-sky-500/40 w-full">
                 <span className="text-2xl">💧</span>
                 Submit Water
               </div>
@@ -527,7 +561,7 @@ export default function HomePage() {
 
             <Link
               href="/map"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10 hover:border-cyan-500/35 text-cyan-100 font-semibold px-10 py-5 text-base transition-all"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-sky-500/20 bg-sky-500/5 hover:bg-sky-500/10 hover:border-sky-500/35 text-sky-100 font-semibold px-10 py-5 text-base transition-all"
             >
               Explore Map →
             </Link>
@@ -547,7 +581,7 @@ export default function HomePage() {
           >
             <Link
               href="/map"
-              className="group block relative rounded-3xl overflow-hidden border border-white/8 hover:border-cyan-500/30 transition-all duration-300 shadow-2xl shadow-black/40"
+              className="group block relative rounded-3xl overflow-hidden border border-white/8 hover:border-sky-500/30 transition-all duration-300 shadow-2xl shadow-black/40"
             >
               <div className="h-72 md:h-[420px] relative bg-[#082535]">
                 {/* Grid lines */}
@@ -563,22 +597,22 @@ export default function HomePage() {
                 />
 
                 {/* Water body blobs */}
-                <div className="absolute top-[22%] left-[30%] w-48 h-28 bg-cyan-500/18 rounded-[60%] blur-3xl" />
+                <div className="absolute top-[22%] left-[30%] w-48 h-28 bg-sky-500/18 rounded-[60%] blur-3xl" />
                 <div className="absolute top-[48%] right-[22%] w-64 h-40 bg-blue-500/14 rounded-[50%] blur-3xl" />
                 <div className="absolute bottom-[20%] left-[18%] w-32 h-32 bg-teal-500/14 rounded-full blur-2xl" />
-                <div className="absolute top-[35%] right-[40%] w-24 h-14 bg-cyan-400/10 rounded-full blur-xl" />
+                <div className="absolute top-[35%] right-[40%] w-24 h-14 bg-sky-400/10 rounded-full blur-xl" />
                 <div className="absolute bottom-[35%] right-[10%] w-20 h-20 bg-blue-400/8 rounded-full blur-xl" />
 
                 {/* Animated location dots */}
                 {MAP_DOTS.map((pos, i) => (
                   <div key={i} className="absolute" style={{ top: pos.top, left: pos.left }}>
                     <motion.div
-                      className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/60"
+                      className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-lg shadow-sky-400/60"
                       animate={{ scale: [1, 1.6, 1], opacity: [0.7, 1, 0.7] }}
                       transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.5 }}
                     />
                     <motion.div
-                      className="absolute inset-0 rounded-full bg-cyan-400/30"
+                      className="absolute inset-0 rounded-full bg-sky-400/30"
                       animate={{ scale: [1, 3, 1], opacity: [0.4, 0, 0.4] }}
                       transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.5 }}
                     />
@@ -588,7 +622,7 @@ export default function HomePage() {
                 {/* Bottom gradient */}
                 <div className="absolute inset-0 bg-linear-to-t from-[#082535]/95 via-[#082535]/20 to-transparent" />
                 {/* Hover tint */}
-                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/4 transition-all duration-300" />
+                <div className="absolute inset-0 bg-sky-500/0 group-hover:bg-sky-500/4 transition-all duration-300" />
 
                 {/* Text content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 px-6 text-center">
@@ -598,7 +632,7 @@ export default function HomePage() {
                   <p className="text-zinc-400 text-sm md:text-base mt-2 max-w-xs">
                     Discover and rate water bodies around the world
                   </p>
-                  <div className="mt-6 px-8 py-3.5 rounded-2xl bg-white/8 border border-white/12 text-white text-sm font-semibold group-hover:bg-cyan-500 group-hover:border-cyan-500 group-hover:text-black group-hover:shadow-xl group-hover:shadow-cyan-500/30 transition-all duration-300">
+                  <div className="mt-6 px-8 py-3.5 rounded-2xl bg-white/8 border border-white/12 text-white text-sm font-semibold group-hover:bg-sky-500 group-hover:border-sky-500 group-hover:text-black group-hover:shadow-xl group-hover:shadow-sky-500/30 transition-all duration-300">
                     Open Full Map
                   </div>
                 </div>
@@ -614,7 +648,7 @@ export default function HomePage() {
           {/* Section header */}
           <div className="flex items-end justify-between mb-5">
             <div>
-              <p className="text-[10px] font-semibold text-cyan-700 uppercase tracking-[0.18em] mb-1">
+              <p className="text-[10px] font-semibold text-sky-600 uppercase tracking-[0.18em] mb-1">
                 How do you rate water?
               </p>
               <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
@@ -623,7 +657,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/upload"
-              className="hidden sm:block text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+              className="hidden sm:block text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors"
             >
               Rate water →
             </Link>
@@ -745,7 +779,7 @@ export default function HomePage() {
               className={cn(
                 "rounded-xl px-5 py-2 text-sm font-semibold transition-all",
                 tab === "nearby"
-                  ? "bg-cyan-500/15 text-cyan-400 shadow"
+                  ? "bg-sky-500/15 text-sky-400 shadow"
                   : "text-zinc-500 hover:text-zinc-300"
               )}
             >
@@ -797,7 +831,7 @@ export default function HomePage() {
               <p className="mt-2 text-zinc-500 text-sm mb-8">Be the first to submit one!</p>
               <Link
                 href="/upload"
-                className="inline-flex items-center gap-2 rounded-2xl bg-cyan-500 text-black font-bold px-8 py-3.5 text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/30"
+                className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 text-black font-bold px-8 py-3.5 text-sm hover:bg-sky-400 transition-colors shadow-lg shadow-sky-500/30"
               >
                 💧 Submit Water
               </Link>
