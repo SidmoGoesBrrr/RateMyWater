@@ -27,9 +27,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid cursor" }, { status: 400 });
     }
 
+    // Geo filter: ?lat=...&lng=...&radius=... (radius in km, default 200)
+    const lat = parseFloat(searchParams.get("lat") ?? "");
+    const lng = parseFloat(searchParams.get("lng") ?? "");
+    const radiusKm = parseFloat(searchParams.get("radius") ?? "200");
+    const hasGeo = !isNaN(lat) && !isNaN(lng);
+
     const filter: Record<string, unknown> = {};
     if (type && type !== "all") filter.type = type;
     if (cursor) filter.createdAt = { $lt: cursor };
+    if (hasGeo) {
+      filter["coordinates.lat"] = { $gte: lat - radiusKm / 111, $lte: lat + radiusKm / 111 };
+      filter["coordinates.lng"] = {
+        $gte: lng - radiusKm / (111 * Math.cos((lat * Math.PI) / 180)),
+        $lte: lng + radiusKm / (111 * Math.cos((lat * Math.PI) / 180)),
+      };
+    }
 
     const sortField: Record<string, 1 | -1> =
       sortParam === "score" ? { averageScore: -1, createdAt: -1 } : { createdAt: -1 };
