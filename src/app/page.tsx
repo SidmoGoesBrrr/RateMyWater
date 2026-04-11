@@ -449,11 +449,9 @@ export default function HomePage() {
   const loadGlobal = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch("/api/water?limit=30&sort=createdAt");
+      const r = await fetch("/api/water?limit=50&sort=score");
       const data = await r.json();
-      const items: FeedEntry[] = data.items ?? [];
-      items.sort((a, b) => b.averageScore - a.averageScore);
-      setEntries(items);
+      setEntries(data.items ?? []);
     } catch {
       setEntries([]);
     } finally {
@@ -464,7 +462,7 @@ export default function HomePage() {
   const loadNearby = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
     try {
-      const r = await fetch(`/api/water?limit=50&sort=createdAt`);
+      const r = await fetch(`/api/water?limit=50&lat=${lat}&lng=${lng}&radius=200`);
       const data = await r.json();
       const all: FeedEntry[] = data.items ?? [];
       const withDist = all
@@ -473,7 +471,7 @@ export default function HomePage() {
           ...w,
           _dist: distanceKm(lat, lng, w.coordinates!.lat, w.coordinates!.lng),
         }))
-        .sort((a, b) => b.averageScore - a.averageScore);
+        .sort((a, b) => a._dist - b._dist);
       setEntries(withDist.length > 0 ? withDist : all);
     } catch {
       setEntries([]);
