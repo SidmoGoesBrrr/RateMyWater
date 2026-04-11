@@ -12,7 +12,6 @@ import {
 import { PlacesAutocomplete } from "@/components/PlacesAutocomplete";
 import { cn } from "@/lib/utils";
 
-// Dynamically import the map to avoid SSR issues
 const GoogleMapView = dynamic(
   () => import("@/components/GoogleMapView").then((m) => m.GoogleMapView),
   { ssr: false }
@@ -26,6 +25,15 @@ const WATER_TYPES = [
   { value: "pond", label: "Pond", emoji: "🦆" },
 ];
 
+const fieldVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.07, type: "spring" as const, stiffness: 280, damping: 24 },
+  }),
+};
+
 export default function UploadPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +45,7 @@ export default function UploadPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shake, setShake] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -91,6 +100,8 @@ export default function UploadPage() {
     e.preventDefault();
     if (!selectedFile || !form.name || !form.location || !form.type) {
       setError("Please fill in all required fields and upload a photo.");
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
       return;
     }
 
@@ -133,25 +144,52 @@ export default function UploadPage() {
 
   return (
     <main className="min-h-screen bg-[#060d1f] text-white pt-14 md:pt-14">
-      {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-cyan-500/4 rounded-full blur-3xl" />
+        <motion.div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-cyan-500/4 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
       <div className="relative max-w-xl mx-auto px-4 pt-6 pb-32 md:pb-10">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6">
-          <ChevronLeft className="h-4 w-4" />
-          Back
-        </Link>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-3xl font-black text-white">Submit Water</h1>
-          <p className="mt-1.5 text-sm text-zinc-400">
-            Help the community know what they&apos;re getting into.
-          </p>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          whileHover={{ x: -3 }}
+        >
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors mb-6">
+            <ChevronLeft className="h-4 w-4" />
+            Back
+          </Link>
         </motion.div>
 
-        <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 280, damping: 22 }}
+          className="mb-8"
+        >
+          <motion.h1
+            className="text-3xl font-black text-white"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.05, type: "spring", stiffness: 300 }}
+          >
+            Submit Water
+          </motion.h1>
+          <motion.p
+            className="mt-1.5 text-sm text-zinc-400"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+          >
+            Help the community know what they&apos;re getting into.
+          </motion.p>
+        </motion.div>
+
+        <AnimatePresence mode="wait">
           {submitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -160,37 +198,58 @@ export default function UploadPage() {
             >
               <motion.div
                 className="text-7xl mb-6"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
               >
                 🌊
               </motion.div>
-              <CheckCircle className="h-12 w-12 text-cyan-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white">Water submitted!</h2>
-              <p className="mt-2 text-zinc-400">Redirecting to your water&apos;s page…</p>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, delay: 0.25 }}
+              >
+                <CheckCircle className="h-12 w-12 text-cyan-400 mx-auto mb-4" />
+              </motion.div>
+              <motion.h2
+                className="text-2xl font-bold text-white"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+              >
+                Water submitted!
+              </motion.h2>
+              <motion.p
+                className="mt-2 text-zinc-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+              >
+                Redirecting to your water&apos;s page…
+              </motion.p>
             </motion.div>
           ) : (
             <motion.form
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               onSubmit={handleSubmit}
               className="space-y-5"
             >
               {/* ── Image drop zone ────────────────────────── */}
-              <div>
+              <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="visible">
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
                   Photo <span className="text-red-400">*</span>
                 </label>
-                <div
+                <motion.div
+                  animate={isDragging ? { scale: 1.02, borderColor: "rgba(34,211,238,0.6)" } : { scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   onDrop={handleDrop}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onClick={() => !previewUrl && fileInputRef.current?.click()}
                   className={cn(
-                    "relative rounded-2xl border-2 border-dashed transition-all duration-200 overflow-hidden",
-                    isDragging ? "border-cyan-400 bg-cyan-500/10 scale-[1.01]" : "border-white/15 bg-slate-900/40 hover:border-white/25",
+                    "relative rounded-2xl border-2 border-dashed transition-colors duration-200 overflow-hidden",
+                    isDragging ? "border-cyan-400 bg-cyan-500/10" : "border-white/15 bg-slate-900/40 hover:border-white/25",
                     !previewUrl && "cursor-pointer"
                   )}
                   style={{ minHeight: 180 }}
@@ -199,21 +258,33 @@ export default function UploadPage() {
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
 
                   {previewUrl ? (
-                    <div className="relative h-56 w-full">
+                    <motion.div
+                      className="relative h-56 w-full"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
                       <Image src={previewUrl} alt="Preview" fill className="object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                      <button type="button"
+                      <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={(e) => { e.stopPropagation(); setPreviewUrl(null); setSelectedFile(null); }}
                         className="absolute top-3 right-3 rounded-full bg-black/70 p-1.5 hover:bg-black/90 transition-colors"
                       >
                         <X className="h-4 w-4 text-white" />
-                      </button>
-                    </div>
+                      </motion.button>
+                    </motion.div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 gap-3">
-                      <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                      <motion.div
+                        className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center"
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      >
                         <Upload className="h-6 w-6 text-zinc-400" />
-                      </div>
+                      </motion.div>
                       <div className="text-center">
                         <p className="text-sm text-zinc-300 font-medium">
                           Drop your photo or <span className="text-cyan-400">click to browse</span>
@@ -222,40 +293,59 @@ export default function UploadPage() {
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               {/* ── Water type ─────────────────────────────── */}
-              <div>
+              <motion.div custom={1} variants={fieldVariants} initial="hidden" animate="visible">
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
                   Water Type <span className="text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-5 gap-2">
-                  {WATER_TYPES.map(({ value, label, emoji }) => (
-                    <button
+                  {WATER_TYPES.map(({ value, label, emoji }, i) => (
+                    <motion.button
                       key={value}
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, type: value }))}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.1 + i * 0.05, type: "spring", stiffness: 400, damping: 20 }}
+                      whileHover={{ scale: 1.07, y: -2 }}
+                      whileTap={{ scale: 0.93 }}
                       className={cn(
-                        "flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 border text-xs font-medium transition-all duration-200",
+                        "flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 border text-xs font-medium transition-colors duration-200",
                         form.type === value
-                          ? "border-cyan-500/50 bg-cyan-500/15 text-white scale-[1.04]"
+                          ? "border-cyan-500/50 bg-cyan-500/15 text-white"
                           : "border-white/10 bg-slate-900/40 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
                       )}
                     >
-                      <span className="text-2xl">{emoji}</span>
+                      <motion.span
+                        className="text-2xl"
+                        animate={form.type === value ? { rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] } : {}}
+                        transition={{ duration: 0.4 }}
+                      >
+                        {emoji}
+                      </motion.span>
                       <span>{label}</span>
-                    </button>
+                      {form.type === value && (
+                        <motion.div
+                          layoutId="type-selection"
+                          className="absolute inset-0 rounded-xl border border-cyan-500/40 bg-cyan-500/10"
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        />
+                      )}
+                    </motion.button>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {/* ── Name ───────────────────────────────────── */}
-              <div>
+              <motion.div custom={2} variants={fieldVariants} initial="hidden" animate="visible">
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
                   Water Body Name <span className="text-red-400">*</span>
                 </label>
-                <input
+                <motion.input
+                  whileFocus={{ scale: 1.01, borderColor: "rgba(34,211,238,0.5)" }}
                   type="text"
                   placeholder="e.g. Roth Pond, Bondi Beach"
                   maxLength={100}
@@ -263,22 +353,29 @@ export default function UploadPage() {
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   className="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 transition-all"
                 />
-              </div>
+              </motion.div>
 
-              {/* ── Location with Places autocomplete ──────── */}
-              <div>
+              {/* ── Location ───────────────────────────────── */}
+              <motion.div custom={3} variants={fieldVariants} initial="hidden" animate="visible">
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-zinc-300">
                     Location <span className="text-red-400">*</span>
                   </label>
-                  <button
+                  <motion.button
                     type="button"
                     onClick={locateMe}
+                    whileHover={{ scale: 1.05, x: -2 }}
+                    whileTap={{ scale: 0.95 }}
                     className="flex items-center gap-1.5 text-xs text-cyan-600 hover:text-cyan-400 transition-colors"
                   >
-                    <Crosshair className="h-3.5 w-3.5" />
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Crosshair className="h-3.5 w-3.5" />
+                    </motion.div>
                     Use my location
-                  </button>
+                  </motion.button>
                 </div>
                 <PlacesAutocomplete
                   value={form.location}
@@ -286,20 +383,27 @@ export default function UploadPage() {
                   onPlaceSelected={handlePlaceSelected}
                   placeholder="Search or type location…"
                 />
-                {coordinates && (
-                  <p className="mt-1.5 text-xs text-cyan-700 flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    Pin at {coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)}
-                    <button
-                      type="button"
-                      onClick={() => setShowMap(!showMap)}
-                      className="ml-2 text-cyan-600 hover:text-cyan-400 underline"
+                <AnimatePresence>
+                  {coordinates && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="mt-1.5 text-xs text-cyan-700 flex items-center gap-1"
                     >
-                      {showMap ? "Hide" : "Show"} map
-                    </button>
-                  </p>
-                )}
-              </div>
+                      <MapPin className="h-3 w-3" />
+                      Pin at {coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)}
+                      <button
+                        type="button"
+                        onClick={() => setShowMap(!showMap)}
+                        className="ml-2 text-cyan-600 hover:text-cyan-400 underline"
+                      >
+                        {showMap ? "Hide" : "Show"} map
+                      </button>
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </motion.div>
 
               {/* ── Mini map ───────────────────────────────── */}
               <AnimatePresence>
@@ -328,13 +432,14 @@ export default function UploadPage() {
               </AnimatePresence>
 
               {/* ── Description ────────────────────────────── */}
-              <div>
+              <motion.div custom={4} variants={fieldVariants} initial="hidden" animate="visible">
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
                   <FileText className="inline h-3.5 w-3.5 mr-1.5 text-zinc-500" />
                   Description{" "}
                   <span className="text-zinc-600 font-normal">(optional)</span>
                 </label>
-                <textarea
+                <motion.textarea
+                  whileFocus={{ scale: 1.01 }}
                   placeholder="Vibe? Notable features? Mystery foam?"
                   maxLength={500}
                   rows={3}
@@ -342,16 +447,17 @@ export default function UploadPage() {
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   className="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 transition-all resize-none"
                 />
-              </div>
+              </motion.div>
 
-              {/* ── Name ───────────────────────────────────── */}
-              <div>
+              {/* ── Your Name ──────────────────────────────── */}
+              <motion.div custom={5} variants={fieldVariants} initial="hidden" animate="visible">
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
                   <User className="inline h-3.5 w-3.5 mr-1.5 text-zinc-500" />
                   Your Name{" "}
                   <span className="text-zinc-600 font-normal">(optional)</span>
                 </label>
-                <input
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
                   type="text"
                   placeholder="Anonymous"
                   maxLength={50}
@@ -359,41 +465,72 @@ export default function UploadPage() {
                   onChange={(e) => setForm((f) => ({ ...f, uploadedBy: e.target.value }))}
                   className="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 transition-all"
                 />
-              </div>
+              </motion.div>
 
               {/* ── Error ──────────────────────────────────── */}
               <AnimatePresence>
                 {error && (
                   <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
+                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
                     className="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
                   >
-                    <X className="h-4 w-4 flex-shrink-0" />
+                    <motion.div
+                      animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <X className="h-4 w-4 shrink-0" />
+                    </motion.div>
                     {error}
                   </motion.div>
                 )}
               </AnimatePresence>
 
               {/* ── Submit button ───────────────────────────── */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-4 text-sm transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30"
+              <motion.div
+                custom={6}
+                variants={fieldVariants}
+                initial="hidden"
+                animate="visible"
+                animate-={shake ? { x: [-8, 8, -8, 8, -4, 4, 0] } : {}}
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {uploading ? "Uploading photo…" : "Submitting…"}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    Submit Water Body
-                  </>
-                )}
-              </button>
+                <motion.button
+                  type="submit"
+                  disabled={isLoading}
+                  whileHover={!isLoading ? { scale: 1.02, boxShadow: "0 0 30px rgba(34,211,238,0.4)" } : {}}
+                  whileTap={!isLoading ? { scale: 0.97 } : {}}
+                  animate={shake ? { x: [-8, 8, -8, 8, 0] } : {}}
+                  transition={shake ? { duration: 0.4 } : { type: "spring", stiffness: 400 }}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-4 text-sm transition-colors shadow-lg shadow-cyan-500/20"
+                >
+                  <AnimatePresence mode="wait">
+                    {isLoading ? (
+                      <motion.span
+                        key="loading"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="flex items-center gap-2"
+                      >
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {uploading ? "Uploading photo…" : "Submitting…"}
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="idle"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="h-4 w-4" />
+                        Submit Water Body
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </motion.div>
             </motion.form>
           )}
         </AnimatePresence>
