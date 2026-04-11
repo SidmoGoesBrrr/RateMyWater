@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Home, Map, Trophy, MessageSquare, Search, Plus } from "lucide-react";
+import { useUser } from "@auth0/nextjs-auth0";
+import { Home, Map, Trophy, MessageSquare, Search, Plus, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { user, isLoading } = useUser();
 
   return (
     <>
@@ -56,6 +58,27 @@ export function Navbar() {
             );
           })}
         </nav>
+
+        {/* Auth control */}
+        <div className="ml-auto flex items-center">
+          {isLoading ? null : user ? (
+            <a
+              href="/auth/logout"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12 transition-all duration-200"
+            >
+              <LogOut className="h-4 w-4 text-white/50" />
+              Sign out
+            </a>
+          ) : (
+            <a
+              href="/auth/login"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-cyan-100 bg-cyan-500/18 border border-cyan-400/30 hover:bg-cyan-500/25 transition-all duration-200"
+            >
+              <LogIn className="h-4 w-4 text-cyan-400" />
+              Sign in
+            </a>
+          )}
+        </div>
       </header>
 
       {/* ── Mobile bottom bar ────────────────────────────────── */}

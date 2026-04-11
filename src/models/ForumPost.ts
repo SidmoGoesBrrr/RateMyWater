@@ -10,6 +10,8 @@ export interface IForumPost extends Document {
   title: string;
   body: string;
   author: string;
+  authorUserId?: string;
+  authorName?: string;
   waterBodyId?: string;
   waterBodyName?: string;
   tags: string[];
@@ -30,6 +32,8 @@ const ForumPostSchema = new Schema<IForumPost>(
     title: { type: String, required: true, trim: true, maxlength: 150 },
     body: { type: String, required: true, maxlength: 2000 },
     author: { type: String, default: "Anonymous", maxlength: 50 },
+    authorUserId: { type: String, index: true },
+    authorName: { type: String, maxlength: 100 },
     waterBodyId: { type: String },
     waterBodyName: { type: String, maxlength: 100 },
     tags: [{ type: String, maxlength: 30 }],
@@ -38,6 +42,9 @@ const ForumPostSchema = new Schema<IForumPost>(
   },
   { timestamps: true }
 );
+
+// Index for cursor pagination (feed is sorted by createdAt desc).
+ForumPostSchema.index({ createdAt: -1 });
 
 export default mongoose.models.ForumPost ||
   mongoose.model<IForumPost>("ForumPost", ForumPostSchema);
