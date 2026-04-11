@@ -504,13 +504,22 @@ export default function HomePage() {
   }, [tab, userPos, loadGlobal, loadNearby]);
 
   return (
-    <main className="min-h-screen bg-[#0a1628] text-white overflow-x-hidden">
+    <main className="min-h-screen text-white overflow-x-hidden" style={{ background: "linear-gradient(to bottom, #0a1628 0%, #06284b 30%, #0a3d6b 50%, #083358 70%, #06284b 85%, #0a1628 100%)" }}>
       <AnimatePresence>
         {showAnimation && <WaterDropAnimation onComplete={handleAnimationComplete} />}
       </AnimatePresence>
 
+      {/* Deep ocean ambient light — scattered throughout the page */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[120vh] left-[10%] w-[500px] h-[500px] bg-sky-500/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute top-[160vh] right-[5%] w-[400px] h-[400px] bg-blue-500/[0.05] rounded-full blur-[100px]" />
+        <div className="absolute top-[220vh] left-[30%] w-[600px] h-[600px] bg-cyan-500/[0.03] rounded-full blur-[140px]" />
+        <div className="absolute top-[300vh] right-[20%] w-[450px] h-[450px] bg-teal-500/[0.04] rounded-full blur-[110px]" />
+        <div className="absolute top-[380vh] left-[15%] w-[350px] h-[350px] bg-sky-600/[0.05] rounded-full blur-[100px]" />
+      </div>
+
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-14 min-h-screen flex flex-col justify-center">
+      <section className="relative overflow-hidden pt-14 min-h-screen flex flex-col justify-center z-[1]">
         {/* Expanding ripple rings */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {[0, 1, 2, 3, 4].map((i) => (
@@ -590,7 +599,7 @@ export default function HomePage() {
       </section>
 
       {/* ── MAP PREVIEW ──────────────────────────────────────── */}
-      <section className="px-4 py-10">
+      <section className="relative z-[1] px-4 py-10">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -662,7 +671,7 @@ export default function HomePage() {
       </section>
 
       {/* ── RATING SCALE ─────────────────────────────────────── */}
-      <section className="px-4 pb-10">
+      <section className="relative z-[1] px-4 pb-10">
         <div className="max-w-5xl mx-auto">
           {/* Section header */}
           <div className="flex items-end justify-between mb-5">
@@ -777,7 +786,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FEED ─────────────────────────────────────────────── */}
-      <section className="px-4 pb-32 md:pb-10">
+      <section className="relative z-[1] px-4 pb-32 md:pb-10">
         <div className="max-w-5xl mx-auto">
           {/* Tabs — no icons */}
           <div className="flex items-center gap-1 mb-5 p-1 rounded-2xl bg-slate-900/60 border border-white/8 w-fit">
