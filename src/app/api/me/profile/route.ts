@@ -46,19 +46,24 @@ export async function GET() {
 
   // --- Uploads ---------------------------------------------------------------
   // Top-level auth0Sub field is indexed, so this is a straight B-tree lookup.
+  // Exclude dead/internal fields on the wire:
+  //   - embedding: legacy from semantic search, ~8KB per doc
+  //   - __v: Mongoose version key, internal
+  //   - auth0Sub: the caller already knows their own sub (they just asked
+  //     for their own profile), no reason to echo it back
+  //   - ratings: the profile card renders only the denormalized aggregate
+  //     stats (averageScore / totalRatings / topRating), not individual
+  //     ratings — saves a significant chunk of payload
   const uploadsRaw = await WaterBody.find({ auth0Sub: sub })
+    .select("-embedding -__v -auth0Sub -ratings")
     .sort({ createdAt: -1 })
     .lean();
 
   const uploads = uploadsRaw.map((w) => {
     const r = w as unknown as Record<string, unknown>;
-    // Strip ratings[] — the profile card doesn't render individual ratings,
-    // only the aggregate totals that are already denormalized on the doc.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { ratings: _ratings, ...rest } = r;
     return {
-      ...rest,
-      imageUrl: sanitizeImageUrl(rest.imageUrl as string | undefined),
+      ...r,
+      imageUrl: sanitizeImageUrl(r.imageUrl as string | undefined),
     };
   });
 

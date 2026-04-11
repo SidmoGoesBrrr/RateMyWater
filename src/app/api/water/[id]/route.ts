@@ -10,30 +10,22 @@ export async function GET(
   try {
     await connectDB();
     const { id } = await params;
-    const water = await WaterBody.findById(id).lean();
+    // Strip dead/internal fields at the query level — consistent with the
+    // feed endpoint and /api/me/profile. Excludes:
+    //   - embedding: legacy from semantic search, ~8KB dead weight
+    //   - __v: Mongoose version key, internal
+    //   - auth0Sub (top + rating): internal identity, not public
+    //   - ratings.deviceId: internal, used only by collaborative filtering
+    const water = await WaterBody.findById(id)
+      .select("-embedding -__v -auth0Sub -ratings.auth0Sub -ratings.deviceId")
+      .lean();
     if (!water) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    // Strip internal identity fields before returning — auth0Sub and
-    // deviceId are used server-side for the /me profile and collaborative
-    // filtering, not intended for public consumption. Also sanitize
-    // orphan pre-Blob imageUrls (same treatment /api/water GET gives them).
-    const w = water as unknown as {
-      imageUrl?: string;
-      auth0Sub?: string;
-      ratings?: Array<{ auth0Sub?: string; deviceId?: string } & Record<string, unknown>>;
-    };
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { auth0Sub: _uploaderSub, ...rest } = w;
-    const cleanedRatings = (w.ratings ?? []).map((r) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { auth0Sub: _raterSub, deviceId: _did, ...rRest } = r;
-      return rRest;
-    });
+    const w = water as unknown as { imageUrl?: string };
     return NextResponse.json({
-      ...rest,
+      ...water,
       imageUrl: sanitizeImageUrl(w.imageUrl),
-      ratings: cleanedRatings,
     });
   } catch {
     return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });

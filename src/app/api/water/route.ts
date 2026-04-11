@@ -35,7 +35,11 @@ export async function GET(req: NextRequest) {
       sortParam === "score" ? { averageScore: -1, createdAt: -1 } : { createdAt: -1 };
 
     // Fetch limit + 1 so we can detect hasMore without a separate count query.
+    // Exclude dead fields: `embedding` is legacy from the ripped-out semantic
+    // search and auth0Sub/deviceId are internal identity the client never
+    // needs. `__v` is Mongoose's version key — also internal.
     const rowsRaw = await WaterBody.find(filter)
+      .select("-embedding -__v -auth0Sub -ratings.auth0Sub -ratings.deviceId")
       .sort(sortField)
       .limit(limit + 1)
       .lean();
