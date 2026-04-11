@@ -160,9 +160,46 @@ export function FishCanvas() {
 
       const { x: mx, y: my } = mouseRef.current;
 
+      // ── Separation pass (boids rule 1) ──
+      // For each pair of fish, if they're within (sumRadius * SEPARATION_RADIUS),
+      // push them apart along the line between their centers. Force falls off
+      // linearly with distance so distant pairs barely feel each other. This
+      // happens BEFORE the per-fish wander/rush step, so the accumulated
+      // `sep` nudges get mixed into the same frame's velocity update below.
+      //
+      // Complexity is O(n²) — fine at COUNT=6. If you bump the count past
+      // ~50 you'd want to spatial-hash this.
+      const SEPARATION_RADIUS = 1.6; // multiplier on (fish.size + other.size)
+      const SEPARATION_STRENGTH = 0.35;
+      const seps = fishRef.current.map(() => ({ x: 0, y: 0 }));
+      for (let i = 0; i < fishRef.current.length; i++) {
+        for (let j = i + 1; j < fishRef.current.length; j++) {
+          const a = fishRef.current[i];
+          const b = fishRef.current[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const distSq = dx * dx + dy * dy;
+          const minDist = (a.size + b.size) * 0.5 * SEPARATION_RADIUS;
+          if (distSq > minDist * minDist || distSq === 0) continue;
+          const dist = Math.sqrt(distSq);
+          // Normalize and scale so closer = stronger push (1 at contact, 0 at minDist).
+          const falloff = 1 - dist / minDist;
+          const push = (SEPARATION_STRENGTH * falloff) / dist;
+          seps[i].x += dx * push;
+          seps[i].y += dy * push;
+          seps[j].x -= dx * push;
+          seps[j].y -= dy * push;
+        }
+      }
+
       // ── Fish ──
-      for (const fish of fishRef.current) {
+      for (let i = 0; i < fishRef.current.length; i++) {
+        const fish = fishRef.current[i];
         fish.wobble += 0.1;
+
+        // Apply separation first so it's felt on every branch (rush + wander).
+        fish.vx += seps[i].x;
+        fish.vy += seps[i].y;
 
         if (fish.rushing) {
           fish.rushLife--;
@@ -179,9 +216,24 @@ export function FishCanvas() {
           if (speed > 4) { fish.vx = (fish.vx / speed) * 4; fish.vy = (fish.vy / speed) * 4; }
           if (fish.rushLife <= 0 || dist < 15) { fish.rushing = false; }
         } else {
-          // Independent wandering — gentle velocity nudge + drift
-          fish.vx += (Math.random() - 0.5) * 0.06;
-          fish.vy += (Math.random() - 0.5) * 0.06;
+          // Independent wandering. Two forces at play here:
+          //
+          //   1. Random nudge — ±0.15 per axis, large enough to actually
+          //      rotate a fish that was already moving at max speed. The
+          //      previous value (0.06) was so small relative to maxSpeed
+          //      (1.4) that a fish which picked up speed from an edge
+          //      bounce would glide in a near-straight line for a full
+          //      second before the nudges could turn it.
+          //
+          //   2. Drag — vx *= 0.985 per frame. Without drag, velocity is
+          //      conserved forever, so edge bounces leave lasting momentum
+          //      and fish favor whatever direction they were already going.
+          //      Light drag pulls them toward stillness, letting the nudge
+          //      dominate and produce real wandering.
+          fish.vx += (Math.random() - 0.5) * 0.3;
+          fish.vy += (Math.random() - 0.5) * 0.3;
+          fish.vx *= 0.985;
+          fish.vy *= 0.985;
 
           // Soft speed cap
           const speed = Math.sqrt(fish.vx * fish.vx + fish.vy * fish.vy);
