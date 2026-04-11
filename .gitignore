@@ -32,6 +32,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# user uploads (store in cloud storage, not git)
+/public/uploads/
+
 # vercel
 .vercel
 
