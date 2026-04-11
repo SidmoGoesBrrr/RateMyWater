@@ -449,7 +449,11 @@ export default function HomePage() {
   const loadGlobal = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch("/api/water?limit=50&sort=score");
+      // Landing-page rankings only show the top 5, so fetch exactly that.
+      // The server is already sorting by score, so the top 5 over the
+      // wire are the same 5 we'd slice to on the client — no point
+      // paying for the extra 45.
+      const r = await fetch("/api/water?limit=5&sort=score");
       const data = await r.json();
       setEntries(data.items ?? []);
     } catch {
@@ -882,8 +886,13 @@ export default function HomePage() {
               </Link>
             </motion.div>
           ) : (
+            // Cap at 5 on the render layer rather than at the server. Each
+            // mode's fetch already sorts correctly — global comes back
+            // sorted by score, nearby is client-sorted by distance inside
+            // loadNearby — so slicing here just preserves "top 5" in each
+            // mode's own sense without needing a second round trip.
             <div className="flex flex-col gap-3">
-              {entries.map((entry) => {
+              {entries.slice(0, 5).map((entry) => {
                 const dist =
                   tab === "nearby" && userPos && entry.coordinates
                     ? distanceKm(
