@@ -3,7 +3,6 @@ import { useCallback, useRef, useState } from "react";
 import {
   GoogleMap,
   OverlayView,
-  InfoWindow,
 } from "@react-google-maps/api";
 import { useGoogleMaps } from "@/lib/google-maps";
 import { motion, AnimatePresence } from "framer-motion";
@@ -260,13 +259,13 @@ export function GoogleMapView({
 
         {/* Info popup */}
         {selected && infoPos && (
-          <InfoWindow
+          <OverlayView
             position={infoPos}
-            onCloseClick={() => setSelected(null)}
-            options={{ pixelOffset: new google.maps.Size(0, -60), disableAutoPan: true }}
+            mapPaneName={OverlayView.FLOAT_PANE}
+            getPixelPositionOffset={() => ({ x: -120, y: -340 })}
           >
             <WaterInfoCard water={selected} onClose={() => setSelected(null)} />
-          </InfoWindow>
+          </OverlayView>
         )}
       </GoogleMap>
 
@@ -297,9 +296,15 @@ function WaterInfoCard({ water, onClose }: { water: MapWaterEntry; onClose: () =
 
   return (
     <div
-      className="rounded-2xl overflow-hidden shadow-2xl"
+      className="rounded-2xl overflow-hidden shadow-2xl relative"
       style={{ width: 240, background: "#0d1f35", border: "1px solid rgba(255,255,255,0.1)" }}
     >
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-black/60 backdrop-blur-sm border border-white/15 flex items-center justify-center hover:bg-black/80 transition-colors"
+      >
+        <X className="h-3.5 w-3.5 text-white/80" />
+      </button>
       <div className="relative h-32 w-full">
         <Image src={water.imageUrl} alt={water.name} fill className="object-cover" sizes="240px" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d1f35] to-transparent" />

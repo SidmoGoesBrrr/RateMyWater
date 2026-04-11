@@ -72,20 +72,48 @@ a, button, [role="button"], input, select, textarea, label {
   animation: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
 }
 
-/* ── Custom scrollbar ──────────────────────────────────────── */
+/* ── Scrollbars — global + utility class ───────────────────── */
+
+/* Page-level scrollbar (the one in the corner) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-corner {
+  background: #060d1f;
+}
+::-webkit-scrollbar-track {
+  background: #060d1f;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.18);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.35);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 211, 238, 0.18) #060d1f;
+}
+
+/* Narrower scrollbar for in-component lists */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 2px;
+  background: #060d1f;
+  border-radius: 999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  background: rgba(34, 211, 238, 0.18);
+  border-radius: 999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(34, 211, 238, 0.35);
 }
 
 /* ── Selection ─────────────────────────────────────────────── */

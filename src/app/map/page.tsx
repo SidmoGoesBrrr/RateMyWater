@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import { Search, Filter, Navigation, Layers } from "lucide-react";
+import { Search, Filter, Navigation, Layers, Umbrella, Waves, Mountain, Trees, Droplets, Droplet, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type MapWaterEntry } from "@/components/GoogleMapView";
 
@@ -19,13 +19,13 @@ const GoogleMapView = dynamic(
   )}
 );
 
-const TYPE_OPTIONS = [
-  { value: "all", label: "All", emoji: "💧" },
-  { value: "beach", label: "Beach", emoji: "🏖️" },
-  { value: "ocean", label: "Ocean", emoji: "🌊" },
-  { value: "lake", label: "Lake", emoji: "🏔️" },
-  { value: "river", label: "River", emoji: "🌿" },
-  { value: "pond", label: "Pond", emoji: "🦆" },
+const TYPE_OPTIONS: Array<{ value: string; label: string; icon: LucideIcon; color: string }> = [
+  { value: "all",   label: "All",   icon: Droplet,  color: "#94a3b8" },
+  { value: "beach", label: "Beach", icon: Umbrella, color: "#fbbf24" },
+  { value: "ocean", label: "Ocean", icon: Waves,    color: "#22d3ee" },
+  { value: "lake",  label: "Lake",  icon: Mountain, color: "#818cf8" },
+  { value: "river", label: "River", icon: Trees,    color: "#34d399" },
+  { value: "pond",  label: "Pond",  icon: Droplets, color: "#60a5fa" },
 ];
 
 export default function MapPage() {
@@ -102,7 +102,7 @@ export default function MapPage() {
         {/* Filters row */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <Filter className="h-4 w-4 text-zinc-500 flex-shrink-0" />
-          {TYPE_OPTIONS.map(({ value, label, emoji }) => (
+          {TYPE_OPTIONS.map(({ value, label, icon: Icon, color }) => (
             <button
               key={value}
               onClick={() => setTypeFilter(value)}
@@ -113,7 +113,7 @@ export default function MapPage() {
                   : "border-white/10 bg-slate-900/40 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
               )}
             >
-              <span>{emoji}</span>
+              <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: typeFilter === value ? "currentColor" : color }} />
               <span>{label}</span>
             </button>
           ))}
