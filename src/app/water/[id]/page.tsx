@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Trophy, Upload, MapPin, Calendar, ChevronLeft,
-  MessageSquare, CheckCircle, Loader2, Users,
+  MessageSquare, CheckCircle, Loader2, Users, Sparkles,
   Umbrella, Waves, Mountain, Trees, Droplets, Droplet,
   type LucideIcon,
 } from "lucide-react";
@@ -18,6 +18,20 @@ interface RatingEntry {
   rating: WaterRating;
   comment?: string;
   ratedAt: string;
+}
+
+interface RecommendedWater {
+  _id: string;
+  name: string;
+  location: string;
+  type: string;
+  imageUrl: string;
+  averageScore: number;
+  totalRatings: number;
+  topRating?: WaterRating;
+  reason: "collaborative" | "similar_vibes";
+  sharedRaters?: number;
+  similarity?: number;
 }
 
 interface WaterDetail {
@@ -118,6 +132,120 @@ function RatingCommentCard({ entry, index }: { entry: RatingEntry; index: number
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function RecommendationCard({ rec, index }: { rec: RecommendedWater; index: number }) {
+  const { icon: Icon, color } = TYPE_ICONS[rec.type] ?? DEFAULT_TYPE_ICON;
+  const isCollaborative = rec.reason === "collaborative";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.07, type: "spring", stiffness: 280, damping: 22 }}
+      whileHover={{ y: -3, scale: 1.02 }}
+      className="flex-shrink-0 w-48 rounded-2xl border border-white/8 bg-slate-900/70 overflow-hidden cursor-pointer"
+    >
+      <Link href={`/water/${rec._id}`} className="block">
+        <div className="relative h-28 overflow-hidden">
+          <Image
+            src={rec.imageUrl}
+            alt={rec.name}
+            fill
+            className="object-cover transition-transform duration-500 hover:scale-105"
+            sizes="192px"
+          />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/60" />
+          {/* Reason chip */}
+          <div
+            className="absolute top-2 left-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold backdrop-blur-sm border"
+            style={{
+              color: isCollaborative ? "#22d3ee" : "#a78bfa",
+              borderColor: isCollaborative ? "rgba(34,211,238,0.3)" : "rgba(167,139,250,0.3)",
+              backgroundColor: isCollaborative ? "rgba(34,211,238,0.12)" : "rgba(167,139,250,0.12)",
+            }}
+          >
+            {isCollaborative
+              ? <><Users className="h-2.5 w-2.5" /> {rec.sharedRaters} shared</>
+              : <><Sparkles className="h-2.5 w-2.5" /> Similar</>
+            }
+          </div>
+          {/* Score badge */}
+          <div className="absolute bottom-2 right-2 rounded-full bg-black/60 backdrop-blur-sm px-2 py-0.5 text-xs font-bold text-white tabular-nums">
+            {rec.averageScore.toFixed(1)}
+          </div>
+        </div>
+        <div className="p-3">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Icon className="h-3 w-3 shrink-0" style={{ color }} />
+            <span className="text-[10px] text-zinc-500 capitalize">{rec.type}</span>
+          </div>
+          <p className="text-sm font-semibold text-white leading-tight line-clamp-1">{rec.name}</p>
+          <p className="text-xs text-zinc-500 mt-0.5 line-clamp-1 flex items-center gap-1">
+            <MapPin className="h-2.5 w-2.5 shrink-0" />
+            {rec.location}
+          </p>
+          {rec.topRating && (
+            <div className="mt-2">
+              <RatingBadge rating={rec.topRating} />
+            </div>
+          )}
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+function RecommendationsSection({ waterId }: { waterId: string }) {
+  const [recs, setRecs] = useState<RecommendedWater[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/water/${waterId}/recommendations`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setRecs(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [waterId]);
+
+  if (!loading && recs.length === 0) return null;
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.35, type: "spring", stiffness: 260, damping: 22 }}
+      className="mt-10"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="h-4 w-4 text-violet-400" />
+        <h2 className="text-sm font-semibold text-zinc-200">
+          People who loved this also loved…
+        </h2>
+      </div>
+
+      {loading ? (
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-48 h-[212px] rounded-2xl border border-white/8 bg-slate-900/40 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
+          {recs.map((rec, i) => (
+            <div key={rec._id} className="snap-start">
+              <RecommendationCard rec={rec} index={i} />
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.section>
   );
 }
 
@@ -552,6 +680,9 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
             </motion.div>
           </div>
         </div>
+
+        {/* Recommendations — lazy loaded below the main grid */}
+        <RecommendationsSection waterId={id} />
       </div>
     </main>
   );

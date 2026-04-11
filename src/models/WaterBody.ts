@@ -10,6 +10,9 @@ export interface IRating {
   rating: WaterRating;
   comment?: string;
   ratedAt: Date;
+  // Anonymous device ID for collaborative filtering.
+  // Optional — ratings submitted before this field existed are still valid.
+  deviceId?: string;
 }
 
 export interface IWaterBody extends Document {
@@ -36,6 +39,7 @@ const RatingSchema = new Schema<IRating>({
   },
   comment: { type: String, maxlength: 300 },
   ratedAt: { type: Date, default: Date.now },
+  deviceId: { type: String, index: true },
 });
 
 const WaterBodySchema = new Schema<IWaterBody>(
