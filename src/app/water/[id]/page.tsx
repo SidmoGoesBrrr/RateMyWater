@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { WaterRatingPicker, RatingBadge, ScoreDisplay, AppleEmoji } from "@/components/WaterRatingPicker";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
+import { RatingCreatures } from "@/components/RatingCreatures";
 import { cn } from "@/lib/utils";
 
 interface RatingEntry {
@@ -386,6 +387,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
         </motion.div>
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-[#0a1628]" />
         <div className="absolute inset-0 bg-linear-to-r from-[#0a1628]/20 to-transparent" />
+        {water.topRating && <RatingCreatures rating={water.topRating} />}
 
         {/* Back button */}
         <motion.div
