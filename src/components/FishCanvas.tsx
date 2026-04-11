@@ -168,9 +168,46 @@ export function FishCanvas() {
 
       const { x: mx, y: my } = mouseRef.current;
 
+      // ── Separation pass (boids rule 1) ──
+      // For each pair of fish, if they're within (sumRadius * SEPARATION_RADIUS),
+      // push them apart along the line between their centers. Force falls off
+      // linearly with distance so distant pairs barely feel each other. This
+      // happens BEFORE the per-fish wander/rush step, so the accumulated
+      // `sep` nudges get mixed into the same frame's velocity update below.
+      //
+      // Complexity is O(n²) — fine at COUNT=6. If you bump the count past
+      // ~50 you'd want to spatial-hash this.
+      const SEPARATION_RADIUS = 1.6; // multiplier on (fish.size + other.size)
+      const SEPARATION_STRENGTH = 0.35;
+      const seps = fishRef.current.map(() => ({ x: 0, y: 0 }));
+      for (let i = 0; i < fishRef.current.length; i++) {
+        for (let j = i + 1; j < fishRef.current.length; j++) {
+          const a = fishRef.current[i];
+          const b = fishRef.current[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const distSq = dx * dx + dy * dy;
+          const minDist = (a.size + b.size) * 0.5 * SEPARATION_RADIUS;
+          if (distSq > minDist * minDist || distSq === 0) continue;
+          const dist = Math.sqrt(distSq);
+          // Normalize and scale so closer = stronger push (1 at contact, 0 at minDist).
+          const falloff = 1 - dist / minDist;
+          const push = (SEPARATION_STRENGTH * falloff) / dist;
+          seps[i].x += dx * push;
+          seps[i].y += dy * push;
+          seps[j].x -= dx * push;
+          seps[j].y -= dy * push;
+        }
+      }
+
       // ── Fish ──
-      for (const fish of fishRef.current) {
+      for (let i = 0; i < fishRef.current.length; i++) {
+        const fish = fishRef.current[i];
         fish.wobble += 0.1;
+
+        // Apply separation first so it's felt on every branch (rush + wander).
+        fish.vx += seps[i].x;
+        fish.vy += seps[i].y;
 
         if (fish.rushing) {
           fish.rushLife--;
@@ -187,7 +224,13 @@ export function FishCanvas() {
           if (speed > 4) { fish.vx = (fish.vx / speed) * 4; fish.vy = (fish.vy / speed) * 4; }
           if (fish.rushLife <= 0 || dist < 15) { fish.rushing = false; }
         } else {
-          // Periodically pick a new wander direction
+          // Wander with persistent intent. Each fish holds a wanderAngle
+          // that it commits to for 1.3–4 seconds (wanderTimer), then
+          // picks a new angle within ±0.8 rad of its current one. Between
+          // re-picks, the angle drifts mildly (±0.04) for organic curves.
+          // The edge-avoidance block below ALSO rotates wanderAngle when
+          // fish approach a wall, so the targeting stays coherent with
+          // the "get away from that edge" nudge.
           fish.wanderTimer--;
           if (fish.wanderTimer <= 0) {
             fish.wanderAngle += (Math.random() - 0.5) * Math.PI * 0.8;
