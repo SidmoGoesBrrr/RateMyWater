@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { BubbleCursor } from "@/components/BubbleCursor";
 import { auth0 } from "@/lib/auth0";
 
 export const metadata: Metadata = {
@@ -29,6 +30,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className="antialiased bg-[#082232] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
         <Auth0Provider user={initialUser as never}>
+          <BubbleCursor />
           <Navbar />
           {children}
         </Auth0Provider>
