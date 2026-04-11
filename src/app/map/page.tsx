@@ -69,12 +69,19 @@ export default function MapPage() {
     );
   }, []);
 
-  // Compute map center
-  const mapCenter = userCenter ??
-    (filtered.find((w) => w.coordinates)?.coordinates) ??
-    { lat: 20, lng: 0 };
+  // Try to get location on mount
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {} // silently fall back to Stony Brook
+    );
+  }, []);
 
-  const mapZoom = userCenter ? 10 : filtered.length > 0 && filtered[0].coordinates ? 5 : 3;
+  const STONY_BROOK = { lat: 40.9176, lng: -73.1237 };
+
+  // Compute map center: user location > Stony Brook University
+  const mapCenter = userCenter ?? STONY_BROOK;
+  const mapZoom = userCenter ? 12 : 14;
 
   return (
     <main className="h-screen bg-[#060d1f] flex flex-col pt-14 md:pt-14">
@@ -125,12 +132,9 @@ export default function MapPage() {
         </div>
 
         {/* Result count */}
-        <div className="flex items-center justify-between text-xs text-zinc-600 px-1">
+        <div className="flex items-center text-xs text-zinc-600 px-1">
           <span>
-            {loading ? "Loading…" : `${filtered.filter((w) => w.coordinates).length} of ${filtered.length} pins visible`}
-          </span>
-          <span className="text-zinc-700">
-            {filtered.length - filtered.filter((w) => w.coordinates).length} need location data
+            {loading ? "Loading…" : `${filtered.filter((w) => w.coordinates).length} pins on map`}
           </span>
         </div>
       </div>
