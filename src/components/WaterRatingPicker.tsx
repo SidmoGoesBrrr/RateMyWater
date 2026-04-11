@@ -309,8 +309,8 @@ export function RatingBadge({ rating }: { rating: WaterRating }) {
       className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border"
       style={{
         color: meta.color,
-        borderColor: `${meta.color}28`,
-        backgroundColor: `${meta.color}08`,
+        borderColor: `${meta.color}70`,
+        backgroundColor: "#0a1628",
       }}
     >
       <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={13} />

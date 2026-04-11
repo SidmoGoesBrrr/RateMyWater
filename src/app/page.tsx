@@ -277,38 +277,38 @@ function OceanFloor() {
       {/* Deep water base — solid, always visible */}
       <div className="absolute bottom-0 left-0 right-0" style={{ height: "160px", background: "linear-gradient(to top, #04192a 0%, rgba(6,35,60,0.95) 40%, rgba(8,50,85,0.6) 70%, transparent 100%)" }} />
 
-      {/* Layer 1 — deepest undulation */}
+      {/* Layer 1 — deepest undulation (flipped: troughs first) */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 14s linear infinite" }}>
         <svg viewBox="0 0 2880 160" preserveAspectRatio="none" className="w-full" style={{ height: "160px" }}>
-          <path d="M0 80 C360 50 720 110 1080 80 C1440 50 1800 110 2160 80 C2520 50 2880 110 2880 80 L2880 160 L0 160 Z" fill="rgba(6,40,75,0.9)" />
+          <path d="M0 80 C360 115 720 45 1080 80 C1440 115 1800 45 2160 80 C2520 115 2880 45 2880 80 L2880 160 L0 160 Z" fill="rgba(6,40,75,0.9)" />
         </svg>
       </div>
 
-      {/* Layer 2 — dark blue */}
+      {/* Layer 2 — dark blue (flipped) */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 10s linear infinite" }}>
         <svg viewBox="0 0 2880 120" preserveAspectRatio="none" className="w-full" style={{ height: "120px" }}>
-          <path d="M0 60 C360 35 720 85 1080 60 C1440 35 1800 85 2160 60 C2520 35 2880 85 2880 60 L2880 120 L0 120 Z" fill="rgba(10,70,120,0.75)" />
+          <path d="M0 60 C360 90 720 30 1080 60 C1440 90 1800 30 2160 60 C2520 90 2880 30 2880 60 L2880 120 L0 120 Z" fill="rgba(10,70,120,0.75)" />
         </svg>
       </div>
 
-      {/* Layer 3 — mid ocean blue */}
+      {/* Layer 3 — mid ocean blue (flipped) */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 7s linear infinite" }}>
         <svg viewBox="0 0 2880 90" preserveAspectRatio="none" className="w-full" style={{ height: "90px" }}>
-          <path d="M0 45 C360 22 720 68 1080 45 C1440 22 1800 68 2160 45 C2520 22 2880 68 2880 45 L2880 90 L0 90 Z" fill="rgba(14,110,170,0.55)" />
+          <path d="M0 45 C360 70 720 20 1080 45 C1440 70 1800 20 2160 45 C2520 70 2880 20 2880 45 L2880 90 L0 90 Z" fill="rgba(14,110,170,0.55)" />
         </svg>
       </div>
 
-      {/* Layer 4 — teal surface */}
+      {/* Layer 4 — teal surface (flipped) */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 8s linear infinite reverse" }}>
         <svg viewBox="0 0 2880 60" preserveAspectRatio="none" className="w-full" style={{ height: "60px" }}>
-          <path d="M0 30 C360 12 720 48 1080 30 C1440 12 1800 48 2160 30 C2520 12 2880 48 2880 30 L2880 60 L0 60 Z" fill="rgba(20,180,230,0.3)" />
+          <path d="M0 30 C360 48 720 12 1080 30 C1440 48 1800 12 2160 30 C2520 48 2880 12 2880 30 L2880 60 L0 60 Z" fill="rgba(20,180,230,0.3)" />
         </svg>
       </div>
 
-      {/* Layer 5 — light cyan shimmer */}
+      {/* Layer 5 — light cyan shimmer (flipped) */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 6s linear infinite" }}>
         <svg viewBox="0 0 2880 45" preserveAspectRatio="none" className="w-full" style={{ height: "45px" }}>
-          <path d="M0 22 C360 8 720 36 1080 22 C1440 8 1800 36 2160 22 C2520 8 2880 36 2880 22 L2880 45 L0 45 Z" fill="rgba(34,211,238,0.2)" />
+          <path d="M0 22 C360 36 720 8 1080 22 C1440 36 1800 8 2160 22 C2520 36 2880 8 2880 22 L2880 45 L0 45 Z" fill="rgba(34,211,238,0.2)" />
         </svg>
       </div>
 
@@ -382,8 +382,8 @@ function FeedCard({ entry, distKm: dist }: { entry: FeedEntry; distKm?: number }
                 className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border"
                 style={{
                   color: meta.color,
-                  borderColor: `${meta.color}20`,
-                  backgroundColor: `${meta.color}06`,
+                  borderColor: `${meta.color}70`,
+                  backgroundColor: "#0a1628",
                 }}
               >
                 <span>{meta.emoji}</span>

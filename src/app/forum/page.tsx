@@ -91,8 +91,8 @@ function FeedCard({ water }: { water: WaterBody }) {
             <div
               className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold backdrop-blur-md"
               style={{
-                backgroundColor: `${topMeta.color}20`,
-                borderColor: `${topMeta.color}50`,
+                backgroundColor: "#0a1628",
+                borderColor: `${topMeta.color}70`,
                 borderWidth: 1,
                 color: topMeta.color,
               }}
@@ -262,7 +262,7 @@ export default function ForumPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#060d1f] text-white pt-14 md:pt-14">
+    <main className="min-h-screen bg-[#082232] text-white pt-16">
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 md:pb-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
