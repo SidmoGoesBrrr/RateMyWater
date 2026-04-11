@@ -68,6 +68,16 @@ const WATER_TYPES = ["beach", "ocean", "lake", "river", "pond"] as const;
 /** Minimum shared raters before we trust the collaborative signal. */
 const MIN_SHARED_RATERS = 2;
 
+/**
+ * Minimum average score for a water body to be surfaced as a recommendation.
+ * The "people who loved this also loved…" carousel looked incoherent when it
+ * recommended 1.0- and 2.5-rated spots — the label says "loved" so the
+ * destinations have to actually be lovable. 4 = "Would Swim, Mouth Closed"
+ * on the rating scale, which is the natural "I'd actually want to be there"
+ * floor. Spots with score < 4 are hidden from both recommendation algorithms.
+ */
+const MIN_REC_SCORE = 4;
+
 // ── Feature vector ────────────────────────────────────────────────────────────
 
 function buildVector(water: WaterLean): number[] {
@@ -115,6 +125,11 @@ async function collaborativeRecs(
     {
       $match: {
         _id: { $ne: oid },
+        // Only surface spots that are actually well-liked on aggregate.
+        // See MIN_REC_SCORE comment above — the carousel label promises
+        // "people who loved this also loved" so every destination must
+        // be lovable.
+        averageScore: { $gte: MIN_REC_SCORE },
         ratings: {
           $elemMatch: {
             deviceId: { $in: coRaterIds },
@@ -178,8 +193,14 @@ async function featureVectorRecs(
   source: WaterLean,
   limit: number,
 ): Promise<RecommendedWater[]> {
+  // Same floor as the collaborative path — see MIN_REC_SCORE above.
+  // Also keeps the in-memory cosine loop smaller by pre-filtering at the DB.
   const others = await WaterBody.find(
-    { _id: { $ne: oid }, totalRatings: { $gt: 0 } },
+    {
+      _id: { $ne: oid },
+      totalRatings: { $gt: 0 },
+      averageScore: { $gte: MIN_REC_SCORE },
+    },
     { name: 1, location: 1, type: 1, imageUrl: 1, averageScore: 1, totalRatings: 1, topRating: 1, ratings: 1 },
   ).lean() as WaterLean[];
 
