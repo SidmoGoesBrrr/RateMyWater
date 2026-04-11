@@ -284,6 +284,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [ratingUpdated, setRatingUpdated] = useState(false);
   const [ratingError, setRatingError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -310,15 +311,14 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to submit");
+      const newEntry: RatingEntry = { rating: selectedRating, comment, ratedAt: new Date().toISOString() };
+      const stats = { averageScore: data.averageScore, totalRatings: data.totalRatings, topRating: data.topRating };
       setWater((prev) =>
-        prev ? {
-          ...prev,
-          averageScore: data.averageScore,
-          totalRatings: data.totalRatings,
-          topRating: data.topRating,
-          ratings: [{ rating: selectedRating, comment, ratedAt: new Date().toISOString() }, ...prev.ratings],
-        } : prev
+        prev
+          ? { ...prev, ...stats, ratings: data.updated ? prev.ratings : [newEntry, ...prev.ratings] }
+          : prev
       );
+      setRatingUpdated(!!data.updated);
       setRatingSubmitted(true);
     } catch (err) {
       setRatingError(err instanceof Error ? err.message : "Something went wrong");
@@ -559,7 +559,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.28 }}
               >
-                {ratingSubmitted ? "Thanks for rating!" : "Rate This Water"}
+                {ratingSubmitted ? (ratingUpdated ? "Rating updated!" : "Thanks for rating!") : "Rate This Water"}
               </motion.h2>
 
               <AnimatePresence mode="wait">
@@ -585,7 +585,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      Rating submitted!
+                      {ratingUpdated ? "Your rating has been updated." : "Rating submitted!"}
                     </motion.p>
                     {selectedRating && (
                       <motion.div
