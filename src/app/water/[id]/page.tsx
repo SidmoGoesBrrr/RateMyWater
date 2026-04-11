@@ -40,34 +40,37 @@ const TYPE_EMOJIS: Record<string, string> = {
 
 function RatingDistribution({ ratings }: { ratings: RatingEntry[] }) {
   if (ratings.length === 0) return null;
-
   const counts = Object.fromEntries(
     Object.keys(RATING_META).map((k) => [k, 0])
   ) as Record<WaterRating, number>;
-
   for (const r of ratings) counts[r.rating]++;
 
   return (
     <div className="space-y-2.5">
-      {(Object.keys(RATING_META) as WaterRating[]).map((key) => {
+      {(Object.keys(RATING_META) as WaterRating[]).map((key, i) => {
         const meta = RATING_META[key];
         const count = counts[key];
         const pct = ratings.length > 0 ? (count / ratings.length) * 100 : 0;
-
         return (
-          <div key={key} className="flex items-center gap-3">
-            <span className="text-lg flex-shrink-0 w-7 text-center">{meta.emoji}</span>
+          <motion.div
+            key={key}
+            className="flex items-center gap-3"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.06, type: "spring", stiffness: 300 }}
+          >
+            <span className="text-lg shrink-0 w-7 text-center">{meta.emoji}</span>
             <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: meta.color }}
                 initial={{ width: 0 }}
                 animate={{ width: `${pct}%` }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                transition={{ duration: 0.8, delay: i * 0.06, ease: "easeOut" }}
               />
             </div>
             <span className="text-xs text-zinc-500 w-8 text-right tabular-nums">{count}</span>
-          </div>
+          </motion.div>
         );
       })}
     </div>
@@ -82,18 +85,20 @@ function RatingCommentCard({ entry, index }: { entry: RatingEntry; index: number
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      initial={{ opacity: 0, y: 14, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 300, damping: 24 }}
+      whileHover={{ scale: 1.01, x: 2 }}
       className="rounded-xl border border-white/8 bg-slate-900/50 p-4"
     >
       <div className="flex items-start gap-3">
-        <div
-          className="flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center text-lg border"
+        <motion.div
+          className="shrink-0 h-9 w-9 rounded-xl flex items-center justify-center text-lg border"
           style={{ borderColor: `${meta.color}30`, backgroundColor: `${meta.color}15` }}
+          whileHover={{ scale: 1.15, rotate: 5 }}
         >
           {meta.emoji}
-        </div>
+        </motion.div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-semibold" style={{ color: meta.color }}>
@@ -110,17 +115,12 @@ function RatingCommentCard({ entry, index }: { entry: RatingEntry; index: number
   );
 }
 
-export default function WaterDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function WaterDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [water, setWater] = useState<WaterDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // Rating form state
   const [selectedRating, setSelectedRating] = useState<WaterRating | null>(null);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -140,13 +140,9 @@ export default function WaterDetailPage({
   }, [id]);
 
   const submitRating = async () => {
-    if (!selectedRating) {
-      setRatingError("Please select a rating tier.");
-      return;
-    }
+    if (!selectedRating) { setRatingError("Please select a rating tier."); return; }
     setRatingError(null);
     setSubmitting(true);
-
     try {
       const res = await fetch(`/api/water/${id}/rate`, {
         method: "POST",
@@ -155,21 +151,14 @@ export default function WaterDetailPage({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to submit");
-
-      // Update local state
       setWater((prev) =>
-        prev
-          ? {
-              ...prev,
-              averageScore: data.averageScore,
-              totalRatings: data.totalRatings,
-              topRating: data.topRating,
-              ratings: [
-                { rating: selectedRating, comment, ratedAt: new Date().toISOString() },
-                ...prev.ratings,
-              ],
-            }
-          : prev
+        prev ? {
+          ...prev,
+          averageScore: data.averageScore,
+          totalRatings: data.totalRatings,
+          topRating: data.topRating,
+          ratings: [{ rating: selectedRating, comment, ratedAt: new Date().toISOString() }, ...prev.ratings],
+        } : prev
       );
       setRatingSubmitted(true);
     } catch (err) {
@@ -182,10 +171,18 @@ export default function WaterDetailPage({
   if (loading) {
     return (
       <main className="min-h-screen bg-[#060d1f] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-cyan-500/30 border-t-cyan-400 animate-spin" />
+        <motion.div
+          className="flex flex-col items-center gap-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <motion.div
+            className="h-8 w-8 rounded-full border-2 border-cyan-500/30 border-t-cyan-400"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
           <p className="text-zinc-500 text-sm">Loading water data…</p>
-        </div>
+        </motion.div>
       </main>
     );
   }
@@ -193,7 +190,13 @@ export default function WaterDetailPage({
   if (notFound || !water) {
     return (
       <main className="min-h-screen bg-[#060d1f] flex flex-col items-center justify-center text-white">
-        <div className="text-7xl mb-6">💧</div>
+        <motion.div
+          className="text-7xl mb-6"
+          animate={{ y: [0, -12, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          💧
+        </motion.div>
         <h1 className="text-2xl font-bold">Water body not found</h1>
         <Link href="/" className="mt-6 text-cyan-400 hover:text-cyan-300">← Back to home</Link>
       </main>
@@ -206,34 +209,53 @@ export default function WaterDetailPage({
 
   return (
     <main className="min-h-screen bg-[#060d1f] text-white">
-
       {/* Hero image */}
-      <div className="relative h-[50vh] min-h-[320px] w-full">
-        <Image
-          src={water.imageUrl}
-          alt={water.name}
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[#060d1f]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#060d1f]/20 to-transparent" />
+      <div className="relative h-[50vh] min-h-[320px] w-full overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          initial={{ scale: 1.08 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        >
+          <Image
+            src={water.imageUrl}
+            alt={water.name}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-[#060d1f]" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#060d1f]/20 to-transparent" />
 
         {/* Back button */}
-        <Link
-          href="/leaderboard"
-          className="absolute top-20 left-4 md:left-8 inline-flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-sm text-white hover:bg-black/70 transition-colors"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+          whileHover={{ x: -3 }}
+          className="absolute top-20 left-4 md:left-8"
         >
-          <ChevronLeft className="h-4 w-4" />
-          Back
-        </Link>
+          <Link
+            href="/leaderboard"
+            className="inline-flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-sm text-white hover:bg-black/70 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back
+          </Link>
+        </motion.div>
 
         {/* Type badge */}
-        <div className="absolute top-20 right-4 md:right-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-sm text-white">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.25, type: "spring", stiffness: 300 }}
+          className="absolute top-20 right-4 md:right-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-sm text-white"
+        >
           {TYPE_EMOJIS[water.type] ?? "💧"}{" "}
           <span className="capitalize">{water.type}</span>
-        </div>
+        </motion.div>
       </div>
 
       {/* Content */}
@@ -241,19 +263,33 @@ export default function WaterDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left: main info */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Title + meta */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 280, damping: 22 }}
             >
-              <h1 className="text-4xl md:text-5xl font-black text-white leading-tight">
+              <motion.h1
+                className="text-4xl md:text-5xl font-black text-white leading-tight"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05, type: "spring", stiffness: 300 }}
+              >
                 {water.name}
-              </h1>
-              <div className="flex items-center gap-4 mt-3 flex-wrap">
-                <div className="flex items-center gap-1.5 text-zinc-400 text-sm">
+              </motion.h1>
+
+              <motion.div
+                className="flex items-center gap-4 mt-3 flex-wrap"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+              >
+                <motion.div
+                  className="flex items-center gap-1.5 text-zinc-400 text-sm"
+                  whileHover={{ scale: 1.05, x: 2 }}
+                >
                   <MapPin className="h-4 w-4" />
                   <span>{water.location}</span>
-                </div>
+                </motion.div>
                 <div className="flex items-center gap-1.5 text-zinc-500 text-xs">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>Submitted {createdDate}</span>
@@ -262,19 +298,31 @@ export default function WaterDetailPage({
                   <Users className="h-3.5 w-3.5" />
                   <span>by {water.uploadedBy}</span>
                 </div>
-              </div>
+              </motion.div>
 
-              {water.topRating && (
-                <div className="mt-4">
-                  <RatingBadge rating={water.topRating} />
-                  <span className="ml-2 text-xs text-zinc-600">community consensus</span>
-                </div>
-              )}
+              <AnimatePresence>
+                {water.topRating && (
+                  <motion.div
+                    className="mt-4"
+                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                  >
+                    <RatingBadge rating={water.topRating} />
+                    <span className="ml-2 text-xs text-zinc-600">community consensus</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {water.description && (
-                <p className="mt-4 text-zinc-300 leading-relaxed text-sm rounded-xl border border-white/8 bg-slate-900/50 p-4">
+                <motion.p
+                  className="mt-4 text-zinc-300 leading-relaxed text-sm rounded-xl border border-white/8 bg-slate-900/50 p-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                >
                   {water.description}
-                </p>
+                </motion.p>
               )}
             </motion.div>
 
@@ -283,7 +331,7 @@ export default function WaterDetailPage({
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 280 }}
                 className="rounded-2xl border border-white/8 bg-slate-900/50 p-5"
               >
                 <h2 className="text-sm font-semibold text-zinc-300 mb-4">Rating Breakdown</h2>
@@ -291,26 +339,28 @@ export default function WaterDetailPage({
               </motion.div>
             )}
 
-            {/* Community ratings list */}
+            {/* Community ratings */}
             {water.ratings.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 280 }}
               >
-                <div className="flex items-center gap-2 mb-4">
+                <motion.div
+                  className="flex items-center gap-2 mb-4"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.22 }}
+                >
                   <MessageSquare className="h-4 w-4 text-zinc-500" />
                   <h2 className="text-sm font-semibold text-zinc-300">
                     Community Ratings ({water.totalRatings})
                   </h2>
-                </div>
+                </motion.div>
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
-                  {water.ratings
-                    .slice()
-                    .reverse()
-                    .map((entry, i) => (
-                      <RatingCommentCard key={i} entry={entry} index={i} />
-                    ))}
+                  {water.ratings.slice().reverse().map((entry, i) => (
+                    <RatingCommentCard key={i} entry={entry} index={i} />
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -321,9 +371,9 @@ export default function WaterDetailPage({
             {/* Score card */}
             {water.totalRatings > 0 && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 280, damping: 22 }}
                 className="rounded-2xl border border-white/8 bg-slate-900/50 p-6 text-center"
               >
                 <p className="text-xs text-zinc-500 uppercase tracking-widest mb-4">
@@ -335,14 +385,19 @@ export default function WaterDetailPage({
 
             {/* Rating form */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.22, type: "spring", stiffness: 280, damping: 22 }}
               className="rounded-2xl border border-white/8 bg-slate-900/50 p-5"
             >
-              <h2 className="text-base font-bold text-white mb-5">
+              <motion.h2
+                className="text-base font-bold text-white mb-5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.28 }}
+              >
                 {ratingSubmitted ? "Thanks for rating!" : "Rate This Water"}
-              </h2>
+              </motion.h2>
 
               <AnimatePresence mode="wait">
                 {ratingSubmitted ? (
@@ -350,32 +405,61 @@ export default function WaterDetailPage({
                     key="success"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 300 }}
                     className="text-center py-6"
                   >
-                    <CheckCircle className="h-12 w-12 text-cyan-400 mx-auto mb-3" />
-                    <p className="text-white font-semibold">Rating submitted!</p>
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
+                    >
+                      <CheckCircle className="h-12 w-12 text-cyan-400 mx-auto mb-3" />
+                    </motion.div>
+                    <motion.p
+                      className="text-white font-semibold"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      Rating submitted!
+                    </motion.p>
                     {selectedRating && (
-                      <div className="mt-3">
+                      <motion.div
+                        className="mt-3"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
                         <RatingBadge rating={selectedRating} />
-                      </div>
+                      </motion.div>
                     )}
-                    <button
+                    <motion.button
                       onClick={() => { setRatingSubmitted(false); setSelectedRating(null); setComment(""); }}
-                      className="mt-4 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                      whileHover={{ scale: 1.05, color: "#d4d4d8" }}
+                      whileTap={{ scale: 0.95 }}
+                      className="mt-4 text-xs text-zinc-500 transition-colors"
                     >
                       Rate again
-                    </button>
+                    </motion.button>
                   </motion.div>
                 ) : (
-                  <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <WaterRatingPicker
-                      selected={selectedRating}
-                      onSelect={setSelectedRating}
-                    />
+                  <motion.div
+                    key="form"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <WaterRatingPicker selected={selectedRating} onSelect={setSelectedRating} />
 
-                    {/* Optional comment */}
-                    <div className="mt-4">
-                      <textarea
+                    <motion.div
+                      className="mt-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <motion.textarea
+                        whileFocus={{ scale: 1.01, borderColor: "rgba(34,211,238,0.5)" }}
                         placeholder="Add a comment… (optional)"
                         maxLength={300}
                         rows={2}
@@ -388,15 +472,14 @@ export default function WaterDetailPage({
                         )}
                       />
                       <div className="text-xs text-zinc-700 text-right mt-1">{comment.length}/300</div>
-                    </div>
+                    </motion.div>
 
-                    {/* Error */}
                     <AnimatePresence>
                       {ratingError && (
                         <motion.p
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
+                          initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -4 }}
                           className="mt-2 text-xs text-red-400"
                         >
                           {ratingError}
@@ -412,41 +495,63 @@ export default function WaterDetailPage({
                       className="gap-2 text-sm font-semibold text-white disabled:opacity-50"
                       duration={2500}
                     >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Submitting…
-                        </>
-                      ) : (
-                        "Submit Rating"
-                      )}
+                      <AnimatePresence mode="wait">
+                        {submitting ? (
+                          <motion.span
+                            key="loading"
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            className="flex items-center gap-2"
+                          >
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Submitting…
+                          </motion.span>
+                        ) : (
+                          <motion.span
+                            key="idle"
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                          >
+                            Submit Rating
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                     </MovingBorderButton>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>
 
-            {/* Share / more actions */}
+            {/* Action links */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 280 }}
               className="flex flex-col gap-2"
             >
-              <Link
-                href="/leaderboard"
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300 hover:bg-white/10 transition-colors"
-              >
-                <Trophy className="h-4 w-4 text-yellow-400" />
-                View Full Leaderboard
-              </Link>
-              <Link
-                href="/upload"
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300 hover:bg-white/10 transition-colors"
-              >
-                <Upload className="h-4 w-4 text-cyan-400" />
-                Submit Another Water
-              </Link>
+              {[
+                { href: "/leaderboard", icon: <Trophy className="h-4 w-4 text-yellow-400" />, label: "View Full Leaderboard" },
+                { href: "/upload", icon: <Upload className="h-4 w-4 text-cyan-400" />, label: "Submit Another Water" },
+              ].map(({ href, icon, label }, i) => (
+                <motion.div
+                  key={href}
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.32 + i * 0.07, type: "spring", stiffness: 300 }}
+                  whileHover={{ scale: 1.02, x: 3 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <Link
+                    href={href}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    {icon}
+                    {label}
+                  </Link>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </div>
