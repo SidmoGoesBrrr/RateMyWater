@@ -12,6 +12,7 @@ import { MovingBorderButton } from "@/components/ui/moving-border";
 import { WaterRatingPicker, RatingBadge, ScoreDisplay } from "@/components/WaterRatingPicker";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { cn } from "@/lib/utils";
+import { RatingCreatures } from "@/components/RatingCreatures";
 
 interface RatingEntry {
   rating: WaterRating;
@@ -234,6 +235,13 @@ export default function WaterDetailPage({
           {TYPE_EMOJIS[water.type] ?? "💧"}{" "}
           <span className="capitalize">{water.type}</span>
         </div>
+
+        {/* Rating creatures overlay */}
+        {water.topRating && (
+          <div className="absolute inset-0 pointer-events-none">
+            <RatingCreatures rating={water.topRating} />
+          </div>
+        )}
       </div>
 
       {/* Content */}
