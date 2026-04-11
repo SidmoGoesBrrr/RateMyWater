@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongoose";
 import WaterBody from "@/models/WaterBody";
+import { auth0 } from "@/lib/auth0";
 
 // GET /api/water
 // Cursor-paginated feed of water bodies. Cursor is the ISO `createdAt` of the
@@ -77,6 +78,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Uploads are gated behind Auth0 sign-in. The /me profile page keys off
+    // the uploader's Auth0 sub, so an unauthenticated upload would be
+    // orphaned from any profile forever. Return 401 and let the client
+    // redirect to /auth/login.
+    const session = await auth0.getSession();
+    if (!session?.user?.sub) {
+      return NextResponse.json(
+        { error: "You must be signed in to submit water" },
+        { status: 401 },
+      );
+    }
+
     await dbConnect();
 
     const body = await req.json();
@@ -92,7 +105,12 @@ export async function POST(req: NextRequest) {
       type,
       imageUrl,
       description: description?.trim(),
-      uploadedBy: uploadedBy?.trim() || "Anonymous",
+      // Display name: prefer what the user typed, otherwise fall back to
+      // their Auth0 profile name. auth0Sub is the source of truth for
+      // "who owns this upload" — uploadedBy is just for rendering.
+      uploadedBy:
+        uploadedBy?.trim() || session.user.name || session.user.email || "Anonymous",
+      auth0Sub: session.user.sub,
       ...(coordinates?.lat && coordinates?.lng ? { coordinates } : {}),
     });
 

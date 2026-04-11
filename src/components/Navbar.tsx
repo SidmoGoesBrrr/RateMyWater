@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useUser } from "@auth0/nextjs-auth0";
-import { Home, Map, MessageSquare, Search, Plus, LogIn, LogOut } from "lucide-react";
+import { Home, Map, MessageSquare, Search, Plus, LogIn, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -12,6 +12,10 @@ const NAV_ITEMS = [
   { href: "/forum", label: "Forum", icon: MessageSquare },
   { href: "/search", label: "Search", icon: Search },
 ];
+
+// Only shown when the user is signed in — added dynamically below so the
+// signed-out mobile bar stays at 4 tabs and doesn't get cramped.
+const PROFILE_ITEM = { href: "/me", label: "Me", icon: User } as const;
 
 export function Navbar() {
   const pathname = usePathname();
@@ -85,18 +89,41 @@ export function Navbar() {
         </nav>
 
         {/* Auth control */}
-        <div className="ml-auto flex items-center">
+        <div className="ml-auto flex items-center gap-2">
           {isLoading ? null : user ? (
-            /* Sign-out: red/destructive — visually distinct from sign-in */
-            <motion.a
-              href="/auth/logout"
-              whileHover={{ scale: 1.05, boxShadow: "0 0 16px rgba(239,68,68,0.25)" }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-red-300 bg-red-500/10 border border-red-500/25 hover:bg-red-500/18 hover:border-red-400/40 hover:text-red-200 transition-all duration-200"
-            >
-              <LogOut className="h-4 w-4 text-red-400" />
-              Sign out
-            </motion.a>
+            <>
+              {/* Profile link — only for signed-in users. Sits next to sign-out
+                  so the "you are signed in" state feels cohesive. */}
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href={PROFILE_ITEM.href}
+                  className={cn(
+                    "relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200",
+                    pathname.startsWith(PROFILE_ITEM.href)
+                      ? "text-sky-100 bg-sky-500/18 border border-sky-400/30 shadow-sm shadow-sky-500/10"
+                      : "text-white/70 hover:text-white bg-white/4 border border-white/6 hover:bg-white/10 hover:border-white/12"
+                  )}
+                >
+                  <PROFILE_ITEM.icon
+                    className={cn(
+                      "h-4 w-4",
+                      pathname.startsWith(PROFILE_ITEM.href) ? "text-sky-400" : "text-white/50"
+                    )}
+                  />
+                  {PROFILE_ITEM.label}
+                </Link>
+              </motion.div>
+              {/* Sign-out: red/destructive — visually distinct from sign-in */}
+              <motion.a
+                href="/auth/logout"
+                whileHover={{ scale: 1.05, boxShadow: "0 0 16px rgba(239,68,68,0.25)" }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-red-300 bg-red-500/10 border border-red-500/25 hover:bg-red-500/18 hover:border-red-400/40 hover:text-red-200 transition-all duration-200"
+              >
+                <LogOut className="h-4 w-4 text-red-400" />
+                Sign out
+              </motion.a>
+            </>
           ) : (
             /* Sign-in: sky-blue, prominent call-to-action */
             <motion.a
@@ -204,6 +231,49 @@ export function Navbar() {
               </span>
             </Link>
           </motion.div>
+
+          {/* Profile — mobile, signed-in only. Slots in as the 6th item
+              (4 nav + FAB + profile). On narrow phones this is tight, but
+              padding shrinks gracefully via `justify-around`. */}
+          {!isLoading && user && (() => {
+            const active = pathname.startsWith(PROFILE_ITEM.href);
+            const Icon = PROFILE_ITEM.icon;
+            return (
+              <motion.div whileTap={{ scale: 0.85 }} whileHover={{ y: -2 }}>
+                <Link
+                  href={PROFILE_ITEM.href}
+                  className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all"
+                >
+                  {active && (
+                    <motion.div
+                      layoutId="mobile-active"
+                      className="absolute inset-0 rounded-xl bg-sky-500/15 border border-sky-500/20"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <motion.div
+                    animate={active ? { scale: [1, 1.3, 1], y: [0, -3, 0] } : {}}
+                    transition={{ duration: 0.35 }}
+                  >
+                    <Icon
+                      className={cn(
+                        "h-5 w-5 relative z-10 transition-colors",
+                        active ? "text-sky-400" : "text-white/40"
+                      )}
+                    />
+                  </motion.div>
+                  <span
+                    className={cn(
+                      "text-[10px] font-semibold relative z-10 transition-colors",
+                      active ? "text-sky-300" : "text-white/40"
+                    )}
+                  >
+                    {PROFILE_ITEM.label}
+                  </span>
+                </Link>
+              </motion.div>
+            );
+          })()}
         </div>
       </motion.nav>
     </>

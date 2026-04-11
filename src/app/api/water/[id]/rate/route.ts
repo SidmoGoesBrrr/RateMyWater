@@ -1,25 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { nanoid } from "nanoid";
 import connectDB from "@/lib/mongodb";
 import WaterBody from "@/models/WaterBody";
 import { type WaterRating, RATING_META } from "@/models/WaterBody";
-
-const DEVICE_COOKIE = "rmw_did";
-
-async function resolveDeviceId(): Promise<string> {
-  const jar = await cookies();
-  const existing = jar.get(DEVICE_COOKIE)?.value;
-  if (existing) return existing;
-  const fresh = nanoid(16);
-  jar.set(DEVICE_COOKIE, fresh, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-  });
-  return fresh;
-}
+import { getOrCreateDeviceId } from "@/lib/deviceId";
+import { auth0 } from "@/lib/auth0";
 
 export async function POST(
   req: NextRequest,
@@ -39,13 +23,19 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const deviceId = await resolveDeviceId();
+    // Device ID always: drives collaborative filtering and lets anonymous
+    // users rate. Auth0 sub only if signed in — captured so the /me page
+    // can show this rating on the user's profile timeline.
+    const deviceId = await getOrCreateDeviceId();
+    const session = await auth0.getSession();
+    const auth0Sub = session?.user?.sub;
 
     water.ratings.push({
       rating: rating as WaterRating,
       comment: comment?.trim().slice(0, 300),
       ratedAt: new Date(),
       deviceId,
+      ...(auth0Sub ? { auth0Sub } : {}),
     });
 
     await water.save(); // triggers pre-save hook to recalculate stats

@@ -13,6 +13,10 @@ export interface IRating {
   // Anonymous device ID for collaborative filtering.
   // Optional — ratings submitted before this field existed are still valid.
   deviceId?: string;
+  // Auth0 OpenID subject (stable user ID). Captured when a signed-in user
+  // rates. Optional because anonymous rating is still allowed. Used by the
+  // /me profile page to show "your ratings" across devices.
+  auth0Sub?: string;
 }
 
 export interface IWaterBody extends Document {
@@ -22,6 +26,10 @@ export interface IWaterBody extends Document {
   imageUrl: string;
   description?: string;
   uploadedBy: string;
+  // Auth0 OpenID subject (stable user ID) of the uploader. Required going
+  // forward — uploads are gated behind sign-in. Existing pre-auth-gate
+  // water bodies have this unset; the /me profile won't show them.
+  auth0Sub?: string;
   ratings: IRating[];
   averageScore: number;
   totalRatings: number;
@@ -40,6 +48,8 @@ const RatingSchema = new Schema<IRating>({
   comment: { type: String, maxlength: 300 },
   ratedAt: { type: Date, default: Date.now },
   deviceId: { type: String, index: true },
+  // Indexed — the /me profile page queries ratings by auth0Sub.
+  auth0Sub: { type: String, index: true },
 });
 
 const WaterBodySchema = new Schema<IWaterBody>(
@@ -54,6 +64,8 @@ const WaterBodySchema = new Schema<IWaterBody>(
     imageUrl: { type: String, required: true },
     description: { type: String, maxlength: 500 },
     uploadedBy: { type: String, default: "Anonymous", maxlength: 50 },
+    // Indexed — the /me profile page queries water bodies by auth0Sub.
+    auth0Sub: { type: String, index: true },
     ratings: [RatingSchema],
     averageScore: { type: Number, default: 0 },
     totalRatings: { type: Number, default: 0 },
