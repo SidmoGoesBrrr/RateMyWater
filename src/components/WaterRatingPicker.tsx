@@ -144,38 +144,7 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
 
   return (
     <div className="w-full space-y-2">
-      {/* Preview — collapses to zero height when not hovering */}
-      <AnimatePresence initial={false}>
-        {preview && (
-          <motion.div
-            key={preview}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            style={{ overflow: "hidden" }}
-          >
-            <div
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border mb-2"
-              style={{
-                borderColor: `${RATING_META[preview].color}30`,
-                backgroundColor: `${RATING_META[preview].color}0c`,
-              }}
-            >
-              <AppleEmoji
-                hex={RATING_META[preview].emojiHex}
-                fallback={RATING_META[preview].emoji}
-                size={32}
-              />
-              <p className="text-sm font-semibold leading-tight" style={{ color: RATING_META[preview].color }}>
-                {RATING_META[preview].description}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Rating buttons */}
+      {/* Rating buttons — always at stable position, never shift */}
       <div className="flex flex-col gap-2">
         {RATINGS.map((rating, idx) => {
           const meta = RATING_META[rating];
@@ -297,6 +266,38 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
           );
         })}
       </div>
+
+      {/* Preview — BELOW the buttons so expanding it never shifts any button.
+          Expands downward: buttons stay perfectly still, cursor edge never flickers. */}
+      <AnimatePresence initial={false}>
+        {preview && (
+          <motion.div
+            key={preview}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            style={{ overflow: "hidden" }}
+          >
+            <div
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border mt-1"
+              style={{
+                borderColor: `${RATING_META[preview].color}30`,
+                backgroundColor: `${RATING_META[preview].color}0c`,
+              }}
+            >
+              <AppleEmoji
+                hex={RATING_META[preview].emojiHex}
+                fallback={RATING_META[preview].emoji}
+                size={28}
+              />
+              <p className="text-sm font-semibold leading-tight" style={{ color: RATING_META[preview].color }}>
+                {RATING_META[preview].description}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
