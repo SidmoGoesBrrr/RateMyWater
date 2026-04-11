@@ -81,7 +81,7 @@ function UploadCard({ water }: { water: WaterCardData }) {
   return (
     <Link
       href={`/water/${water._id}`}
-      className="relative overflow-hidden bg-[#082232] aspect-square group"
+      className="relative overflow-hidden bg-[#0a1628] aspect-square group"
     >
       <Image
         src={water.imageUrl}
@@ -117,7 +117,7 @@ function RatingRow({ entry }: { entry: ProfileRating }) {
       href={`/water/${entry.water._id}`}
       className="flex gap-3 p-3 rounded-2xl bg-white/4 border border-white/6 hover:bg-white/8 hover:border-white/12 transition-all"
     >
-      <div className="relative h-16 w-16 shrink-0 rounded-xl overflow-hidden bg-[#082232]">
+      <div className="relative h-16 w-16 shrink-0 rounded-xl overflow-hidden bg-[#0a1628]">
         <Image
           src={entry.water.imageUrl}
           alt={entry.water.name}
@@ -254,7 +254,7 @@ export default function MePage() {
   // ── Not signed in ──
   if (!userLoading && !user) {
     return (
-      <main className="min-h-screen bg-[#082232] text-white pt-14 md:pt-16 flex items-center justify-center px-4">
+      <main className="min-h-screen bg-[#0a1628] text-white pt-14 md:pt-16 flex items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -281,7 +281,7 @@ export default function MePage() {
   // ── Loading ──
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#082232] text-white pt-14 md:pt-16 flex items-center justify-center">
+      <main className="min-h-screen bg-[#0a1628] text-white pt-14 md:pt-16 flex items-center justify-center">
         <Loader2 className="h-6 w-6 text-sky-400 animate-spin" />
       </main>
     );
@@ -290,7 +290,7 @@ export default function MePage() {
   // ── Error ──
   if (error || !data) {
     return (
-      <main className="min-h-screen bg-[#082232] text-white pt-14 md:pt-16 flex items-center justify-center px-4">
+      <main className="min-h-screen bg-[#0a1628] text-white pt-14 md:pt-16 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="text-4xl mb-3">🌊</div>
           <p className="text-sm text-zinc-400">Couldn&apos;t load your profile.</p>
@@ -301,7 +301,7 @@ export default function MePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#082232] text-white pt-14 md:pt-16 pb-24 md:pb-4">
+    <main className="min-h-screen bg-[#0a1628] text-white pt-14 md:pt-16 pb-24 md:pb-4">
       <div className="max-w-5xl mx-auto px-4 py-6">
         {/* ── Header ── */}
         <motion.section

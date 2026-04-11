@@ -28,7 +28,7 @@ export function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden md:flex fixed top-0 inset-x-0 z-50 h-16 items-center px-8 border-b border-white/6 bg-[#082232]/92 backdrop-blur-xl"
+        className="hidden md:flex fixed top-0 inset-x-0 z-50 h-16 items-center px-8 border-b border-white/6 bg-[#0a1628]/92 backdrop-blur-xl"
       >
         {/* Logo */}
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
@@ -139,7 +139,7 @@ export function Navbar() {
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.2 }}
-        className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-white/6 bg-[#082232]/96 backdrop-blur-xl"
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-white/6 bg-[#0a1628]/96 backdrop-blur-xl"
       >
         <div className="flex items-center justify-around px-2 py-2 pb-safe">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {

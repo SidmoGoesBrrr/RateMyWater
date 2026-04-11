@@ -28,7 +28,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className="antialiased bg-[#082232] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <body className="antialiased bg-[#0a1628] text-white" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
         <Auth0Provider user={initialUser as never}>
           <BubbleCursor />
           <Navbar />

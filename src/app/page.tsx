@@ -275,7 +275,7 @@ function OceanFloor() {
       {/* ══════ WAVE LAYERS — deep ocean ══════ */}
 
       {/* Deep water base — solid, always visible */}
-      <div className="absolute bottom-0 left-0 right-0" style={{ height: "160px", background: "linear-gradient(to top, #04192a 0%, rgba(6,35,60,0.95) 40%, rgba(8,50,85,0.6) 70%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0" style={{ height: "160px", background: "linear-gradient(to top, #0a1628 0%, rgba(10,30,55,0.95) 40%, rgba(12,45,78,0.6) 70%, transparent 100%)" }} />
 
       {/* Layer 1 — deepest undulation (flipped: troughs first) */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 14s linear infinite" }}>
@@ -487,7 +487,7 @@ export default function HomePage() {
   }, [tab, userPos, loadGlobal, loadNearby]);
 
   return (
-    <main className="min-h-screen bg-[#082232] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#0a1628] text-white overflow-x-hidden">
       <AnimatePresence>
         {showAnimation && <WaterDropAnimation onComplete={handleAnimationComplete} />}
       </AnimatePresence>
@@ -585,7 +585,7 @@ export default function HomePage() {
               href="/map"
               className="group block relative rounded-3xl overflow-hidden border border-white/8 hover:border-sky-500/30 transition-all duration-300 shadow-2xl shadow-black/40"
             >
-              <div className="h-72 md:h-[420px] relative bg-[#082535]">
+              <div className="h-72 md:h-[420px] relative bg-[#0d1f35]">
                 {/* Grid lines */}
                 <div
                   className="absolute inset-0"
@@ -622,7 +622,7 @@ export default function HomePage() {
                 ))}
 
                 {/* Bottom gradient */}
-                <div className="absolute inset-0 bg-linear-to-t from-[#082535]/95 via-[#082535]/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0d1f35]/95 via-[#0d1f35]/20 to-transparent" />
                 {/* Hover tint */}
                 <div className="absolute inset-0 bg-sky-500/0 group-hover:bg-sky-500/4 transition-all duration-300" />
 
@@ -681,7 +681,7 @@ export default function HomePage() {
                 <div
                   className="absolute inset-0"
                   style={{
-                    background: `linear-gradient(160deg, ${meta.color}18 0%, #071a2e 55%, #040f1c 100%)`,
+                    background: `linear-gradient(160deg, ${meta.color}18 0%, #0d1f35 55%, #0a1628 100%)`,
                   }}
                 />
 

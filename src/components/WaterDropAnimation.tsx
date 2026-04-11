@@ -59,7 +59,7 @@ export function WaterDropAnimation({ onComplete }: { onComplete: () => void }) {
 
       // Sky gradient
       const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-      skyGrad.addColorStop(0, "#060d1f");
+      skyGrad.addColorStop(0, "#0a1628");
       skyGrad.addColorStop(1, "#0a1628");
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, W, H);

@@ -163,7 +163,7 @@ function ComposerModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-xl rounded-2xl border border-cyan-500/20 bg-[#060d1f] p-5 shadow-2xl shadow-cyan-500/10 my-8"
+            className="relative w-full max-w-xl rounded-2xl border border-cyan-500/20 bg-[#0a1628] p-5 shadow-2xl shadow-cyan-500/10 my-8"
           >
             <button
               type="button"
@@ -260,7 +260,7 @@ export default function ForumPage() {
   };
 
   return (
-    <main className="h-screen bg-[#082232] text-white pt-16 overflow-y-auto" style={{ scrollSnapType: "y mandatory", scrollPaddingTop: "80px" }}>
+    <main className="h-screen bg-[#0a1628] text-white pt-16 overflow-y-auto" style={{ scrollSnapType: "y mandatory", scrollPaddingTop: "80px" }}>
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 md:pb-10">
         {/* Header */}
         <div className="mb-6 rounded-2xl border border-white/8 bg-linear-to-br from-sky-500/10 via-slate-900/60 to-slate-900/40 p-5" style={{ scrollSnapAlign: "start" }}>

@@ -328,7 +328,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#060d1f] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0a1628] flex items-center justify-center">
         <motion.div
           className="flex flex-col items-center gap-3"
           initial={{ opacity: 0 }}
@@ -347,7 +347,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
 
   if (notFound || !water) {
     return (
-      <main className="min-h-screen bg-[#060d1f] flex flex-col items-center justify-center text-white">
+      <main className="min-h-screen bg-[#0a1628] flex flex-col items-center justify-center text-white">
         <motion.div
           className="text-7xl mb-6"
           animate={{ y: [0, -12, 0] }}
@@ -366,7 +366,7 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
   });
 
   return (
-    <main className="min-h-screen bg-[#060d1f] text-white">
+    <main className="min-h-screen bg-[#0a1628] text-white">
       {/* Hero image */}
       <div className="relative h-[50vh] min-h-[320px] w-full overflow-hidden">
         <motion.div
@@ -384,8 +384,8 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
             sizes="100vw"
           />
         </motion.div>
-        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-[#060d1f]" />
-        <div className="absolute inset-0 bg-linear-to-r from-[#060d1f]/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-[#0a1628]" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#0a1628]/20 to-transparent" />
 
         {/* Back button */}
         <motion.div
