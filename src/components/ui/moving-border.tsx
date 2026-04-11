@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   motion,
   useAnimationFrame,
@@ -77,6 +77,8 @@ export function MovingBorderButton({
   as?: React.ElementType;
   [key: string]: unknown;
 }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <Tag
       className={cn(
@@ -84,6 +86,8 @@ export function MovingBorderButton({
         containerClassName
       )}
       style={{ borderRadius }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       {...rest}
     >
       <div
@@ -92,6 +96,45 @@ export function MovingBorderButton({
       >
         <MovingBorderPath duration={duration} />
       </div>
+
+      {/* Melt drip overlay */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-10"
+        style={{ borderRadius: `calc(${borderRadius} * 0.96)` }}
+        animate={hovered ? "melt" : "idle"}
+        variants={{
+          idle: { opacity: 0 },
+          melt: { opacity: 1 },
+        }}
+        transition={{ duration: 0.2 }}
+      >
+        {/* Liquid shimmer */}
+        <motion.div
+          className="absolute inset-0 bg-linear-to-b from-cyan-500/20 via-cyan-400/10 to-transparent"
+          animate={hovered ? { scaleY: [1, 1.04, 1], y: [0, 2, 0] } : { scaleY: 1, y: 0 }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+          style={{ borderRadius: `calc(${borderRadius} * 0.96)`, transformOrigin: "top" }}
+        />
+        {/* Drip drops */}
+        {[20, 45, 70].map((left, i) => (
+          <motion.div
+            key={i}
+            className="absolute bottom-0 w-1 rounded-full bg-cyan-400/60"
+            style={{ left: `${left}%` }}
+            animate={hovered
+              ? { height: ["0%", "30%", "60%"], opacity: [0, 0.8, 0], y: [0, 6, 14] }
+              : { height: "0%", opacity: 0 }
+            }
+            transition={{
+              duration: 0.9,
+              delay: i * 0.15,
+              repeat: Infinity,
+              ease: "easeIn",
+            }}
+          />
+        ))}
+      </motion.div>
+
       <div
         className={cn(
           "relative flex h-full w-full items-center justify-center",
@@ -101,7 +144,16 @@ export function MovingBorderButton({
         )}
         style={{ borderRadius: `calc(${borderRadius} * 0.96)` }}
       >
-        {children}
+        <motion.span
+          className="flex items-center gap-2"
+          animate={hovered
+            ? { letterSpacing: "0.04em", y: -1 }
+            : { letterSpacing: "0em", y: 0 }
+          }
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          {children}
+        </motion.span>
       </div>
     </Tag>
   );
