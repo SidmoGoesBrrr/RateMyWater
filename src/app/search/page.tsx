@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X, Sparkles, Loader2 } from "lucide-react";
 import { type WaterCardData } from "@/components/WaterCard";
 import { RATING_META } from "@/lib/water-types";
 import { cn } from "@/lib/utils";
@@ -120,42 +120,121 @@ function GridCard({
   );
 }
 
+// "mode" describes which source produced the current results list.
+// - "idle" — showing all water bodies (no query)
+// - "semantic" — results came from /api/search/semantic (vector similarity)
+// - "fallback" — semantic call failed, we're showing client-side string matches
+type SearchMode = "idle" | "semantic" | "fallback";
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [results, setResults] = useState<WaterCardData[]>([]);
   const [all, setAll] = useState<WaterCardData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
+  const [mode, setMode] = useState<SearchMode>("idle");
 
+  // Track the most recent query we kicked off so stale responses can't
+  // overwrite fresh ones (e.g. user types "be" then "beach" fast — the
+  // "be" response shouldn't land after the "beach" response).
+  const latestQueryRef = useRef<string>("");
+
+  // Initial load: pull the top ~100 water bodies. Used as the idle view
+  // AND as the fallback when semantic search is unavailable.
   useEffect(() => {
     fetch("/api/water?limit=100&sort=score")
       .then((r) => r.json())
       .then((d) => {
         setAll(d.items ?? []);
-        setResults(d.items ?? []);
-        setLoading(false);
+        setInitialLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => setInitialLoading(false));
   }, []);
 
-  const filter = useCallback(() => {
-    let list = all;
-    if (typeFilter) list = list.filter((w) => w.type === typeFilter);
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter(
-        (w) =>
-          w.name.toLowerCase().includes(q) ||
-          w.location.toLowerCase().includes(q) ||
-          w.uploadedBy.toLowerCase().includes(q)
-      );
-    }
-    setResults(list);
-  }, [all, query, typeFilter]);
+  // Client-side string-match fallback. Used when the semantic call fails
+  // and when there's no query (idle view).
+  const applyFallbackFilter = useCallback(
+    (q: string, type: string): WaterCardData[] => {
+      let list = all;
+      if (type) list = list.filter((w) => w.type === type);
+      if (q.trim()) {
+        const lower = q.toLowerCase();
+        list = list.filter(
+          (w) =>
+            w.name.toLowerCase().includes(lower) ||
+            w.location.toLowerCase().includes(lower) ||
+            w.uploadedBy.toLowerCase().includes(lower),
+        );
+      }
+      return list;
+    },
+    [all],
+  );
 
+  // Debounced semantic search. 400ms delay so we don't hammer Voyage on
+  // every keystroke. Short queries (<3 chars) fall back to string match
+  // because single-letter semantic queries are useless and waste tokens.
   useEffect(() => {
-    filter();
-  }, [filter]);
+    const q = query.trim();
+
+    // Empty query: idle view, show everything (respecting type filter).
+    if (!q) {
+      setResults(applyFallbackFilter("", typeFilter));
+      setMode("idle");
+      setSearching(false);
+      return;
+    }
+
+    // Too short to bother with embeddings — client-side match only.
+    if (q.length < 3) {
+      setResults(applyFallbackFilter(q, typeFilter));
+      setMode("fallback");
+      setSearching(false);
+      return;
+    }
+
+    latestQueryRef.current = q;
+    setSearching(true);
+
+    const handle = setTimeout(async () => {
+      try {
+        const r = await fetch("/api/search/semantic", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            q,
+            type: typeFilter || undefined,
+            limit: 30,
+          }),
+        });
+
+        // If the user has typed a newer query since we kicked this one off,
+        // drop this response on the floor.
+        if (latestQueryRef.current !== q) return;
+
+        if (!r.ok) {
+          // 503 = semantic unavailable, fall back gracefully.
+          setResults(applyFallbackFilter(q, typeFilter));
+          setMode("fallback");
+          return;
+        }
+
+        const data = (await r.json()) as { items: WaterCardData[] };
+        setResults(data.items ?? []);
+        setMode("semantic");
+      } catch {
+        // Network error — fall back.
+        if (latestQueryRef.current !== q) return;
+        setResults(applyFallbackFilter(q, typeFilter));
+        setMode("fallback");
+      } finally {
+        if (latestQueryRef.current === q) setSearching(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(handle);
+  }, [query, typeFilter, applyFallbackFilter]);
 
   return (
     <main className="min-h-screen bg-[#082232] text-white pt-14 md:pt-16 overflow-x-hidden">
@@ -212,17 +291,36 @@ export default function SearchPage() {
 
       {/* ── Explore grid ── */}
       <div className="w-full px-0 pt-0 pb-24 md:pb-4">
-        {/* Result count row */}
-        {!loading && results.length > 0 && (
-          <p className="text-xs text-zinc-600 px-4 py-2">
-            {results.length} result{results.length !== 1 ? "s" : ""}
-            {query && (
-              <span className="text-zinc-500"> for &ldquo;{query}&rdquo;</span>
+        {/* Result count + search mode indicator */}
+        {!initialLoading && (
+          <div className="flex items-center gap-2 px-4 py-2">
+            {results.length > 0 && (
+              <p className="text-xs text-zinc-600">
+                {results.length} result{results.length !== 1 ? "s" : ""}
+                {query && (
+                  <span className="text-zinc-500"> for &ldquo;{query}&rdquo;</span>
+                )}
+              </p>
             )}
-          </p>
+            {searching && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-cyan-500">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                thinking…
+              </span>
+            )}
+            {!searching && mode === "semantic" && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-400">
+                <Sparkles className="h-3 w-3" />
+                semantic
+              </span>
+            )}
+            {!searching && mode === "fallback" && query.trim().length >= 3 && (
+              <span className="text-[10px] text-zinc-600">(basic match)</span>
+            )}
+          </div>
         )}
 
-        {loading ? (
+        {initialLoading ? (
           /* Skeleton — mimic the tall pattern */
           <div
             className="grid grid-cols-4 gap-0.5"
