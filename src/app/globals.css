@@ -21,6 +21,12 @@ body {
   color: white;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+}
+
+/* Restore pointer cursor for interactive elements */
+a, button, [role="button"], input, select, textarea, label {
+  cursor: none;
 }
 
 /* ── Aurora animation ──────────────────────────────────────── */

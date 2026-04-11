@@ -339,7 +339,7 @@ export default function HomePage() {
       </AnimatePresence>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-14 min-h-[88vh] flex flex-col justify-center">
+      <section data-hero className="relative overflow-hidden pt-14 min-h-[88vh] flex flex-col justify-center">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {[0, 1, 2, 3, 4].map((i) => (
             <motion.div key={i} className="absolute rounded-full border border-cyan-400/10" initial={{ width: 60, height: 60, opacity: 0.6 }} animate={{ width: 560 + i * 130, height: 560 + i * 130, opacity: 0 }} transition={{ duration: 6, repeat: Infinity, delay: i * 1.2, ease: "linear" }} />

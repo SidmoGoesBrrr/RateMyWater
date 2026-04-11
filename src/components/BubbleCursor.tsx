@@ -37,21 +37,63 @@ export function BubbleCursor() {
     };
     window.addEventListener("mousemove", onMove);
 
+    // Check if mouse is inside the hero section
+    const isInHero = () => {
+      const hero = document.querySelector<HTMLElement>("[data-hero]");
+      if (!hero) return false;
+      const rect = hero.getBoundingClientRect();
+      const { x, y } = mouseRef.current;
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    };
+
     const spawn = (now: number) => {
-      if (now - lastSpawnRef.current < 40) return;
+      if (!isInHero()) return;
+      if (now - lastSpawnRef.current < 80) return; // slower spawn rate
       lastSpawnRef.current = now;
-      const size = 4 + Math.random() * 14;
-      const maxLife = 60 + Math.random() * 50;
+      const size = 4 + Math.random() * 12;
+      const maxLife = 110 + Math.random() * 80; // longer life = slower fade
       bubblesRef.current.push({
-        x: mouseRef.current.x + (Math.random() - 0.5) * 12,
-        y: mouseRef.current.y + (Math.random() - 0.5) * 12,
+        x: mouseRef.current.x + (Math.random() - 0.5) * 10,
+        y: mouseRef.current.y + (Math.random() - 0.5) * 10,
         size,
-        alpha: 0.55 + Math.random() * 0.3,
-        vx: (Math.random() - 0.5) * 1.2,
-        vy: -0.6 - Math.random() * 1.4,
+        alpha: 0.5 + Math.random() * 0.25,
+        vx: (Math.random() - 0.5) * 0.5,  // slower horizontal drift
+        vy: -0.25 - Math.random() * 0.55,  // slower upward float
         life: 0,
         maxLife,
       });
+    };
+
+    const drawCursor = () => {
+      const { x, y } = mouseRef.current;
+      if (x < 0 || y < 0) return;
+      const r = 11;
+
+      // Bubble fill
+      const grad = ctx.createRadialGradient(
+        x - r * 0.3, y - r * 0.3, r * 0.05,
+        x, y, r
+      );
+      grad.addColorStop(0, "rgba(200, 245, 255, 0.45)");
+      grad.addColorStop(0.55, "rgba(34, 211, 238, 0.18)");
+      grad.addColorStop(1, "rgba(34, 211, 238, 0)");
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Rim
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(130, 220, 255, 0.85)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Glint
+      ctx.beginPath();
+      ctx.arc(x - r * 0.32, y - r * 0.32, r * 0.2, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+      ctx.fill();
     };
 
     const draw = (now: number) => {
@@ -64,13 +106,12 @@ export function BubbleCursor() {
         b.life++;
         b.x += b.vx;
         b.y += b.vy;
-        b.vx *= 0.98;
-        b.vy *= 0.98;
+        b.vx *= 0.995; // less deceleration = stays drifting longer
+        b.vy *= 0.995;
         const t = b.life / b.maxLife;
         const alpha = b.alpha * (1 - t);
         const r = b.size * (0.7 + 0.3 * t);
 
-        // Bubble fill
         const grad = ctx.createRadialGradient(
           b.x - r * 0.3, b.y - r * 0.3, r * 0.05,
           b.x, b.y, r
@@ -83,20 +124,19 @@ export function BubbleCursor() {
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Bubble rim
         ctx.beginPath();
         ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(130, 220, 255, ${alpha * 0.7})`;
         ctx.lineWidth = 0.8;
         ctx.stroke();
 
-        // Glint
         ctx.beginPath();
         ctx.arc(b.x - r * 0.3, b.y - r * 0.3, r * 0.18, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.65})`;
         ctx.fill();
       }
 
+      drawCursor();
       rafRef.current = requestAnimationFrame(draw);
     };
 
@@ -112,7 +152,7 @@ export function BubbleCursor() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[9999]"
+      className="fixed inset-0 pointer-events-none z-9999"
       style={{ mixBlendMode: "screen" }}
     />
   );
