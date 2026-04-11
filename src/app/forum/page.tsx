@@ -59,22 +59,22 @@ function FeedCard({ water }: { water: WaterBody }) {
     >
       <Link href={`/water/${water._id}`} className="block">
         {/* Header row: author + timestamp + location */}
-        <div className="px-4 pt-4 pb-2 flex items-center gap-2 text-xs text-zinc-500">
-          <div className="h-6 w-6 rounded-full bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
-            <User className="h-3 w-3 text-cyan-500" />
+        <div className="px-4 pt-4 pb-2 flex items-center gap-3 text-sm">
+          <div className="h-8 w-8 rounded-full bg-sky-500/15 border border-sky-500/25 flex items-center justify-center">
+            <User className="h-4 w-4 text-sky-400" />
           </div>
-          <span className="text-zinc-400 font-medium">{water.uploadedBy}</span>
-          <span className="text-zinc-700">·</span>
-          <span className="text-zinc-600">{timeAgo(water.createdAt)}</span>
-          <span className="text-zinc-700">·</span>
-          <span className="text-zinc-600 flex items-center gap-0.5 truncate">
-            <MapPin className="h-2.5 w-2.5 shrink-0" />
+          <span className="text-white font-bold">{water.uploadedBy}</span>
+          <span className="text-zinc-600">·</span>
+          <span className="text-sky-400/70 font-medium text-xs">{timeAgo(water.createdAt)}</span>
+          <span className="text-zinc-600">·</span>
+          <span className="text-zinc-300 flex items-center gap-1 truncate text-xs font-medium">
+            <MapPin className="h-3 w-3 text-sky-400/60 shrink-0" />
             <span className="truncate">{water.location}</span>
           </span>
         </div>
 
-        {/* Title (Reddit-style) */}
-        <h2 className="px-4 pb-3 text-lg font-bold text-white leading-tight">
+        {/* Title */}
+        <h2 className="px-4 pb-3 text-xl font-black text-white leading-tight">
           {water.name}
         </h2>
 
@@ -112,26 +112,23 @@ function FeedCard({ water }: { water: WaterBody }) {
         )}
 
         {/* Stats footer: ratings + comments */}
-        <div className="px-4 py-3 flex items-center gap-5 text-xs text-zinc-500 border-t border-white/5 mt-3">
-          <span className="flex items-center gap-1.5">
-            <Star className="h-3.5 w-3.5 text-cyan-500" />
-            <span className="text-zinc-400 font-semibold">
-              {water.totalRatings}
-            </span>
-            <span>{water.totalRatings === 1 ? "rating" : "ratings"}</span>
-            {water.totalRatings > 0 && (
-              <span className="text-zinc-600 ml-0.5">
-                · {water.averageScore.toFixed(1)}/5
-              </span>
-            )}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MessageSquare className="h-3.5 w-3.5 text-cyan-500" />
-            <span className="text-zinc-400 font-semibold">
-              {water.commentCount ?? 0}
-            </span>
-            <span>{water.commentCount === 1 ? "comment" : "comments"}</span>
-          </span>
+        <div className="px-4 py-3.5 flex items-center gap-4 text-sm border-t border-white/6 mt-3">
+          <div className="flex items-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-500/15 px-3 py-1.5">
+            <Star className="h-3.5 w-3.5 text-amber-400" />
+            <span className="text-white font-bold">{water.totalRatings}</span>
+            <span className="text-zinc-400 text-xs">{water.totalRatings === 1 ? "rating" : "ratings"}</span>
+          </div>
+          {water.totalRatings > 0 && (
+            <div className="rounded-lg bg-amber-500/10 border border-amber-500/15 px-3 py-1.5">
+              <span className="text-amber-400 font-black text-sm">{water.averageScore.toFixed(1)}</span>
+              <span className="text-zinc-500 text-xs">/5</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-500/15 px-3 py-1.5">
+            <MessageSquare className="h-3.5 w-3.5 text-sky-400" />
+            <span className="text-white font-bold">{water.commentCount ?? 0}</span>
+            <span className="text-zinc-400 text-xs">{water.commentCount === 1 ? "comment" : "comments"}</span>
+          </div>
         </div>
       </Link>
     </motion.article>
@@ -266,38 +263,43 @@ export default function ForumPage() {
     <main className="h-screen bg-[#082232] text-white pt-16 overflow-y-auto" style={{ scrollSnapType: "y mandatory", scrollPaddingTop: "80px" }}>
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 md:pb-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6" style={{ scrollSnapAlign: "start" }}>
-          <div>
-            <h1 className="text-2xl font-black text-white">Feed</h1>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Fresh water bodies, freshly rated
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleNewPostClick}
-            className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/25"
-          >
-            <Plus className="h-4 w-4" />
-            Submit Water
-          </button>
-        </div>
-
-        {/* Unauthenticated CTA */}
-        {!userLoading && !user && (
-          <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-white/8 bg-slate-900/40 px-4 py-3">
-            <p className="text-xs text-zinc-400">
-              Sign in to submit water bodies and rate them.
-            </p>
-            <a
-              href="/auth/login?returnTo=/forum"
-              className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+        <div className="mb-6 rounded-2xl border border-white/8 bg-linear-to-br from-sky-500/10 via-slate-900/60 to-slate-900/40 p-5" style={{ scrollSnapAlign: "start" }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-black text-white tracking-tight">Feed</h1>
+              <p className="text-sm text-sky-300/70 mt-1 font-medium">
+                Fresh water bodies, freshly rated
+              </p>
+            </div>
+            <motion.button
+              type="button"
+              onClick={handleNewPostClick}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all bg-sky-500 hover:bg-sky-400 text-black shadow-lg shadow-sky-500/25"
             >
-              <LogIn className="h-3.5 w-3.5" />
-              Sign in
-            </a>
+              <Plus className="h-4 w-4" />
+              Submit Water
+            </motion.button>
           </div>
-        )}
+
+          {/* Unauthenticated CTA */}
+          {!userLoading && !user && (
+            <motion.a
+              href="/auth/login?returnTo=/forum"
+              whileHover={{ scale: 1.01 }}
+              className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-sky-500/20 bg-sky-500/8 px-4 py-3 group hover:border-sky-500/35 transition-all"
+            >
+              <p className="text-sm text-zinc-300">
+                Sign in to submit water bodies and rate them.
+              </p>
+              <span className="flex items-center gap-1.5 text-sm font-bold text-sky-400 group-hover:text-sky-300 transition-colors shrink-0">
+                <LogIn className="h-4 w-4" />
+                Sign in
+              </span>
+            </motion.a>
+          )}
+        </div>
 
         {/* Composer modal */}
         <ComposerModal
