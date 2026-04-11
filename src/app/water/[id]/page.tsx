@@ -8,7 +8,6 @@ import {
   Trophy, Upload, MapPin, Calendar, ChevronLeft,
   MessageSquare, CheckCircle, Loader2, Users
 } from "lucide-react";
-import { MovingBorderButton } from "@/components/ui/moving-border";
 import { WaterRatingPicker, RatingBadge, ScoreDisplay } from "@/components/WaterRatingPicker";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { cn } from "@/lib/utils";
@@ -487,38 +486,26 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
                       )}
                     </AnimatePresence>
 
-                    <MovingBorderButton
-                      as="button"
+                    <motion.button
                       onClick={submitting ? undefined : submitRating}
                       disabled={submitting}
-                      containerClassName="h-12 w-full rounded-xl mt-4"
-                      className="gap-2 text-sm font-semibold text-white disabled:opacity-50"
-                      duration={2500}
+                      whileHover={!submitting ? { scale: 1.02, boxShadow: "0 0 24px rgba(34,211,238,0.35)" } : {}}
+                      whileTap={!submitting ? { scale: 0.97 } : {}}
+                      className="mt-4 w-full h-12 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2"
                     >
                       <AnimatePresence mode="wait">
                         {submitting ? (
-                          <motion.span
-                            key="loading"
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                            className="flex items-center gap-2"
-                          >
+                          <motion.span key="loading" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             Submitting…
                           </motion.span>
                         ) : (
-                          <motion.span
-                            key="idle"
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -6 }}
-                          >
+                          <motion.span key="idle" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
                             Submit Rating
                           </motion.span>
                         )}
                       </AnimatePresence>
-                    </MovingBorderButton>
+                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>

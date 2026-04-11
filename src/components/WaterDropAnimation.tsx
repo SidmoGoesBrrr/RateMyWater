@@ -209,19 +209,8 @@ export function WaterDropAnimation({ onComplete }: { onComplete: () => void }) {
             <h1 className="text-5xl font-black text-white tracking-tight">
               Rate<span className="text-cyan-400">My</span>Water
             </h1>
-            <p className="mt-2 text-zinc-400 text-sm">
-              Tap to skip
-            </p>
           </motion.div>
         </div>
-
-        {/* Skip button */}
-        <button
-          onClick={() => { completedRef.current = true; setFading(true); setTimeout(() => onComplete(), 900); }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-zinc-500 text-sm hover:text-zinc-300 transition-colors"
-        >
-          skip intro →
-        </button>
       </motion.div>
     </AnimatePresence>
   );

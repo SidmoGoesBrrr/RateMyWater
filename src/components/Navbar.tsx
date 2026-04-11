@@ -3,13 +3,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useUser } from "@auth0/nextjs-auth0";
-import { Home, Map, Trophy, MessageSquare, Search, Plus, LogIn, LogOut } from "lucide-react";
+import { Home, Map, MessageSquare, Search, Plus, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/map", label: "Map", icon: Map },
-  { href: "/leaderboard", label: "Ranks", icon: Trophy },
   { href: "/forum", label: "Forum", icon: MessageSquare },
   { href: "/search", label: "Search", icon: Search },
 ];
