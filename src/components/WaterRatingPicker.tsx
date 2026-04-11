@@ -139,24 +139,24 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
     setTimeout(() => setBurst(null), 800);
   };
 
-  // Only show the description for the hovered or selected item. The container
-  // has a reserved min-h so AnimatePresence transitions never cause a layout
-  // reflow that would move buttons under the cursor and trigger re-hover.
-  const preview = hovered ?? selected;
+  // Preview only appears while actively hovering — zero footprint otherwise.
+  const preview = hovered;
 
   return (
-    <div className="w-full space-y-3">
-      {/* Preview — fixed height so layout never reflows on hover change */}
-      <div className="min-h-[72px] mb-1">
-        <AnimatePresence mode="wait">
-          {preview && (
-            <motion.div
-              key={preview}
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border"
+    <div className="w-full space-y-2">
+      {/* Preview — collapses to zero height when not hovering */}
+      <AnimatePresence initial={false}>
+        {preview && (
+          <motion.div
+            key={preview}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            style={{ overflow: "hidden" }}
+          >
+            <div
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border mb-2"
               style={{
                 borderColor: `${RATING_META[preview].color}30`,
                 backgroundColor: `${RATING_META[preview].color}0c`,
@@ -170,10 +170,10 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
               <p className="text-sm font-semibold leading-tight" style={{ color: RATING_META[preview].color }}>
                 {RATING_META[preview].description}
               </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Rating buttons */}
       <div className="flex flex-col gap-2">

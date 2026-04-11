@@ -6,7 +6,9 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Trophy, Upload, MapPin, Calendar, ChevronLeft,
-  MessageSquare, CheckCircle, Loader2, Users
+  MessageSquare, CheckCircle, Loader2, Users,
+  Umbrella, Waves, Mountain, Trees, Droplets, Droplet,
+  type LucideIcon,
 } from "lucide-react";
 import { WaterRatingPicker, RatingBadge, ScoreDisplay, AppleEmoji } from "@/components/WaterRatingPicker";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
@@ -33,9 +35,14 @@ interface WaterDetail {
   createdAt: string;
 }
 
-const TYPE_EMOJIS: Record<string, string> = {
-  beach: "🏖️", ocean: "🌊", lake: "🏔️", river: "🌿", pond: "🦆",
+const TYPE_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
+  beach:  { icon: Umbrella, color: "#fbbf24" },
+  ocean:  { icon: Waves,    color: "#22d3ee" },
+  lake:   { icon: Mountain, color: "#818cf8" },
+  river:  { icon: Trees,    color: "#34d399" },
+  pond:   { icon: Droplets, color: "#60a5fa" },
 };
+const DEFAULT_TYPE_ICON = { icon: Droplet, color: "#94a3b8" };
 
 function RatingDistribution({ ratings }: { ratings: RatingEntry[] }) {
   if (ratings.length === 0) return null;
@@ -250,9 +257,12 @@ export default function WaterDetailPage({ params }: { params: Promise<{ id: stri
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.25, type: "spring", stiffness: 300 }}
-          className="absolute top-20 right-4 md:right-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-sm text-white"
+          className="absolute top-20 right-4 md:right-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-3 py-1.5 text-sm text-white flex items-center gap-1.5"
         >
-          {TYPE_EMOJIS[water.type] ?? "💧"}{" "}
+          {(() => {
+            const { icon: Icon, color } = TYPE_ICONS[water.type] ?? DEFAULT_TYPE_ICON;
+            return <Icon className="h-3.5 w-3.5 shrink-0" style={{ color }} />;
+          })()}
           <span className="capitalize">{water.type}</span>
         </motion.div>
       </div>
