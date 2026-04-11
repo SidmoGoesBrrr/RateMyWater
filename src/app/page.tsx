@@ -5,7 +5,27 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaterDropAnimation } from "@/components/WaterDropAnimation";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
+import { AppleEmoji } from "@/components/WaterRatingPicker";
+import { Droplet } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function WaterQuestionMark() {
+  return (
+    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+      <path
+        d="M18 22C18 8 46 8 46 22C46 34 32 36 32 42L32 48"
+        stroke="#38bdf8"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M32 51C36 55 37 57 37 59A5 5 0 0 1 27 59C27 57 28 55 32 51Z"
+        fill="#38bdf8"
+      />
+    </svg>
+  );
+}
 
 interface FeedEntry {
   _id: string;
@@ -386,7 +406,7 @@ function FeedCard({ entry, distKm: dist }: { entry: FeedEntry; distKm?: number }
                   backgroundColor: "#0a1628",
                 }}
               >
-                <span>{meta.emoji}</span>
+                <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={13} />
                 <span className="truncate max-w-[140px]">{meta.label}</span>
               </div>
             )}
@@ -556,7 +576,7 @@ export default function HomePage() {
               {/* Glow halo */}
               <div className="absolute -inset-1.5 rounded-[20px] bg-sky-500/35 blur-xl group-hover:bg-sky-400/55 transition-all duration-300" />
               <div className="relative flex items-center justify-center gap-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-black font-black text-xl px-12 py-5 transition-all hover:scale-[1.03] shadow-2xl shadow-sky-500/40 w-full">
-                <span className="text-2xl">💧</span>
+                <Droplet className="h-6 w-6" />
                 Submit Water
               </div>
             </Link>
@@ -711,14 +731,13 @@ export default function HomePage() {
 
                 {/* Content */}
                 <div className="relative flex flex-col items-center gap-2 px-4 pt-6 pb-10 text-center">
-                  {/* Big emoji */}
-                  <motion.span
-                    className="text-4xl md:text-5xl block"
+                  {/* Big rating icon */}
+                  <motion.div
                     whileHover={{ scale: 1.2, rotate: [0, -5, 5, 0] }}
                     transition={{ duration: 0.3 }}
                   >
-                    {meta.emoji}
-                  </motion.span>
+                    <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={52} />
+                  </motion.div>
 
                   {/* Score pill */}
                   <div
@@ -843,14 +862,14 @@ export default function HomePage() {
               animate={{ opacity: 1 }}
               className="text-center py-24"
             >
-              <div className="text-5xl mb-4">🌊</div>
+              <div className="flex justify-center mb-4"><WaterQuestionMark /></div>
               <h3 className="text-lg font-bold text-white">No water bodies yet</h3>
               <p className="mt-2 text-zinc-500 text-sm mb-8">Be the first to submit one!</p>
               <Link
                 href="/upload"
                 className="inline-flex items-center gap-2 rounded-2xl bg-sky-500 text-black font-bold px-8 py-3.5 text-sm hover:bg-sky-400 transition-colors shadow-lg shadow-sky-500/30"
               >
-                💧 Submit Water
+                <Droplet className="h-4 w-4" /> Submit Water
               </Link>
             </motion.div>
           ) : (

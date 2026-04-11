@@ -6,6 +6,7 @@ import Image from "next/image";
 import {
   Upload, X, User, FileText,
   Loader2, MapPin, Crosshair,
+  Umbrella, Waves, Mountain, Trees, Droplets, type LucideIcon,
 } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/PlacesAutocomplete";
 import { cn } from "@/lib/utils";
@@ -17,13 +18,13 @@ const GoogleMapView = dynamic(
   { ssr: false }
 );
 
-const WATER_TYPES = [
-  { value: "beach", label: "Beach", emoji: "🏖️" },
-  { value: "ocean", label: "Ocean", emoji: "🌊" },
-  { value: "lake", label: "Lake", emoji: "🏔️" },
-  { value: "river", label: "River", emoji: "🌿" },
-  { value: "pond", label: "Pond", emoji: "🦆" },
-] as const;
+const WATER_TYPES: Array<{ value: string; label: string; icon: LucideIcon; color: string }> = [
+  { value: "beach", label: "Beach", icon: Umbrella, color: "#fbbf24" },
+  { value: "ocean", label: "Ocean", icon: Waves,    color: "#22d3ee" },
+  { value: "lake",  label: "Lake",  icon: Mountain, color: "#818cf8" },
+  { value: "river", label: "River", icon: Trees,    color: "#34d399" },
+  { value: "pond",  label: "Pond",  icon: Droplets, color: "#60a5fa" },
+];
 
 export interface CreatedWaterBody {
   _id: string;
@@ -219,22 +220,33 @@ export function WaterComposer({
           Water Type <span className="text-red-400">*</span>
         </label>
         <div className="grid grid-cols-5 gap-2">
-          {WATER_TYPES.map(({ value, label, emoji }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setForm((f) => ({ ...f, type: value }))}
-              className={cn(
-                "flex flex-col items-center gap-1.5 rounded-xl py-3 px-2 border text-xs font-medium transition-all duration-200",
-                form.type === value
-                  ? "border-cyan-500/50 bg-cyan-500/15 text-white scale-[1.04]"
-                  : "border-white/10 bg-slate-900/40 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
-              )}
-            >
-              <span className="text-2xl">{emoji}</span>
-              <span>{label}</span>
-            </button>
-          ))}
+          {WATER_TYPES.map(({ value, label, icon: Icon, color }) => {
+            const isSelected = form.type === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, type: value }))}
+                className={cn(
+                  "flex flex-col items-center gap-2 rounded-xl py-3 px-2 border text-xs font-medium transition-all duration-200",
+                  isSelected
+                    ? "border-cyan-500/50 bg-cyan-500/15 text-white scale-[1.04]"
+                    : "border-white/10 bg-slate-900/40 text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                )}
+              >
+                <div
+                  className="h-9 w-9 rounded-xl flex items-center justify-center"
+                  style={{
+                    backgroundColor: `${color}${isSelected ? "28" : "15"}`,
+                    border: `1.5px solid ${color}${isSelected ? "60" : "30"}`,
+                  }}
+                >
+                  <Icon className="h-5 w-5" style={{ color }} />
+                </div>
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

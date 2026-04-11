@@ -3,19 +3,38 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { X, Search } from "lucide-react";
+import { X, Search, MapPin, Umbrella, Waves, Mountain, Trees, Droplets, Droplet, type LucideIcon } from "lucide-react";
 import { type WaterCardData } from "@/components/WaterCard";
 import { RATING_META } from "@/lib/water-types";
+import { AppleEmoji } from "@/components/WaterRatingPicker";
 import { cn } from "@/lib/utils";
 
-const QUICK_FILTERS = [
-  { label: "All", value: "" },
-  { label: "Beach 🏖️", value: "beach" },
-  { label: "Ocean 🌊", value: "ocean" },
-  { label: "Lake 🏔️", value: "lake" },
-  { label: "River 🌿", value: "river" },
-  { label: "Pond 🦆", value: "pond" },
+const QUICK_FILTERS: Array<{ label: string; value: string; icon: LucideIcon; color: string }> = [
+  { label: "All",   value: "",      icon: Droplet,  color: "#94a3b8" },
+  { label: "Beach", value: "beach", icon: Umbrella, color: "#fbbf24" },
+  { label: "Ocean", value: "ocean", icon: Waves,    color: "#22d3ee" },
+  { label: "Lake",  value: "lake",  icon: Mountain, color: "#818cf8" },
+  { label: "River", value: "river", icon: Trees,    color: "#34d399" },
+  { label: "Pond",  value: "pond",  icon: Droplets, color: "#60a5fa" },
 ];
+
+function WaterQuestionMark() {
+  return (
+    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+      <path
+        d="M18 22C18 8 46 8 46 22C46 34 32 36 32 42L32 48"
+        stroke="#38bdf8"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M32 51C36 55 37 57 37 59A5 5 0 0 1 27 59C27 57 28 55 32 51Z"
+        fill="#38bdf8"
+      />
+    </svg>
+  );
+}
 
 function getScoreColor(score: number) {
   if (score >= 4.5) return "#22d3ee";
@@ -92,13 +111,17 @@ function GridCard({ water, index }: { water: WaterCardData; index: number }) {
               {water.type.charAt(0).toUpperCase() + water.type.slice(1)}
             </span>
             <p className="font-bold text-white text-sm leading-snug truncate">{water.name}</p>
-            <p className="text-zinc-300 text-[11px] mt-0.5 truncate">📍 {water.location}</p>
+            <p className="text-zinc-300 text-[11px] mt-0.5 truncate flex items-center gap-1">
+              <MapPin className="h-2.5 w-2.5 shrink-0 text-zinc-500" />
+              {water.location}
+            </p>
             {topMeta && (
               <div
                 className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold border"
                 style={{ color: topMeta.color, borderColor: `${topMeta.color}40`, backgroundColor: `${topMeta.color}20` }}
               >
-                {topMeta.emoji} {topMeta.label}
+                <AppleEmoji hex={topMeta.emojiHex} fallback={topMeta.emoji} size={10} />
+                {topMeta.label}
               </div>
             )}
             <div className="flex items-center justify-between mt-1.5">
@@ -248,17 +271,18 @@ export default function SearchPage() {
 
           {/* Filter pills */}
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {QUICK_FILTERS.map(({ label, value }) => (
+            {QUICK_FILTERS.map(({ label, value, icon: Icon, color }) => (
               <button
                 key={value}
                 onClick={() => setTypeFilter(value)}
                 className={cn(
-                  "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200",
+                  "shrink-0 flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200",
                   typeFilter === value
                     ? "border-sky-400/50 bg-sky-500/20 text-sky-200 shadow-sm shadow-sky-500/10"
                     : "border-white/8 bg-white/4 text-zinc-400 hover:border-white/18 hover:text-white hover:bg-white/8"
                 )}
               >
+                <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: typeFilter === value ? "currentColor" : color }} />
                 {label}
               </button>
             ))}
@@ -285,7 +309,7 @@ export default function SearchPage() {
           </div>
         ) : results.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center py-24 px-4">
-            <div className="text-5xl mb-4">🌊</div>
+            <div className="flex justify-center mb-4"><WaterQuestionMark /></div>
             <h3 className="text-lg font-bold text-white">No results found</h3>
             <p className="mt-2 text-zinc-500 text-sm">
               {committed ? `Nothing matches "${committed}"` : "No water bodies match your filters"}

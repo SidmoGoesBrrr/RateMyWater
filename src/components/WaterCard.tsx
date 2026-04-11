@@ -2,10 +2,10 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Droplets } from "lucide-react";
+import { MapPin, Umbrella, Waves, Mountain, Trees, Droplets, Droplet, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type WaterRating, RATING_META } from "@/lib/water-types";
-import { ScoreDisplay } from "./WaterRatingPicker";
+import { ScoreDisplay, AppleEmoji } from "./WaterRatingPicker";
 
 export interface WaterCardData {
   _id: string;
@@ -20,13 +20,14 @@ export interface WaterCardData {
   createdAt: string;
 }
 
-const TYPE_ICONS: Record<string, string> = {
-  beach: "🏖️",
-  pond: "🦆",
-  lake: "🏔️",
-  river: "🌊",
-  ocean: "🌊",
+const TYPE_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
+  beach: { icon: Umbrella,  color: "#fbbf24" },
+  ocean: { icon: Waves,     color: "#22d3ee" },
+  lake:  { icon: Mountain,  color: "#818cf8" },
+  river: { icon: Trees,     color: "#34d399" },
+  pond:  { icon: Droplets,  color: "#60a5fa" },
 };
+const DEFAULT_TYPE_ICON = { icon: Droplet, color: "#94a3b8" };
 
 export function WaterCard({
   water,
@@ -79,7 +80,7 @@ export function WaterCard({
 
           {/* Type badge */}
           <div className="absolute top-3 right-3 z-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 px-2.5 py-1 text-xs text-white flex items-center gap-1">
-            <span>{TYPE_ICONS[water.type] ?? "💧"}</span>
+            {(() => { const { icon: Icon, color } = TYPE_ICONS[water.type] ?? DEFAULT_TYPE_ICON; return <Icon className="h-3.5 w-3.5 shrink-0" style={{ color }} />; })()}
             <span className="capitalize">{water.type}</span>
           </div>
         </div>
@@ -122,7 +123,7 @@ export function WaterCard({
                 backgroundColor: `${topMeta.color}12`,
               }}
             >
-              <span>{topMeta.emoji}</span>
+              <AppleEmoji hex={topMeta.emojiHex} fallback={topMeta.emoji} size={12} />
               <span className="truncate max-w-[160px]">{topMeta.label}</span>
             </div>
           )}
