@@ -568,9 +568,12 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-5 text-sky-200/80 text-lg md:text-xl font-medium tracking-wide max-w-md mx-auto leading-relaxed"
+            className="mt-5 text-lg md:text-xl font-semibold max-w-lg mx-auto leading-relaxed tracking-wide"
           >
-            Rigorously unscientific water reviews.
+            <span className="text-sky-300">Is it swimmable?</span>{" "}
+            <span className="text-teal-300">Sippable?</span>{" "}
+            <span className="text-red-400 font-black">A biohazard?</span>{" "}
+            <span className="font-black text-transparent bg-clip-text bg-linear-to-r from-sky-400 via-cyan-300 to-teal-400">Find out.</span>
           </motion.p>
 
           {/* ── SUBMIT WATER — big glowing CTA ── */}
