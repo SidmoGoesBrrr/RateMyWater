@@ -279,43 +279,43 @@ function OceanFloor() {
 
       {/* Layer 1 — deepest undulation */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 14s linear infinite" }}>
-        <svg viewBox="0 0 2880 180" preserveAspectRatio="none" className="w-full" style={{ height: "180px" }}>
-          <path d="M0 90 C180 30 360 150 540 90 C720 30 900 150 1080 90 C1260 30 1440 150 1620 90 C1800 30 1980 150 2160 90 C2340 30 2520 150 2700 90 C2790 60 2835 120 2880 90 L2880 180 L0 180 Z" fill="rgba(6,40,75,0.9)" />
+        <svg viewBox="0 0 2880 160" preserveAspectRatio="none" className="w-full" style={{ height: "160px" }}>
+          <path d="M0 80 C360 50 720 110 1080 80 C1440 50 1800 110 2160 80 C2520 50 2880 110 2880 80 L2880 160 L0 160 Z" fill="rgba(6,40,75,0.9)" />
         </svg>
       </div>
 
       {/* Layer 2 — dark blue */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 10s linear infinite" }}>
-        <svg viewBox="0 0 2880 140" preserveAspectRatio="none" className="w-full" style={{ height: "140px" }}>
-          <path d="M0 70 C240 18 480 122 720 70 C960 18 1200 122 1440 70 C1680 18 1920 122 2160 70 C2400 18 2640 122 2880 70 L2880 140 L0 140 Z" fill="rgba(10,70,120,0.75)" />
+        <svg viewBox="0 0 2880 120" preserveAspectRatio="none" className="w-full" style={{ height: "120px" }}>
+          <path d="M0 60 C360 35 720 85 1080 60 C1440 35 1800 85 2160 60 C2520 35 2880 85 2880 60 L2880 120 L0 120 Z" fill="rgba(10,70,120,0.75)" />
         </svg>
       </div>
 
       {/* Layer 3 — mid ocean blue */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 7s linear infinite" }}>
-        <svg viewBox="0 0 2880 100" preserveAspectRatio="none" className="w-full" style={{ height: "100px" }}>
-          <path d="M0 50 C360 10 720 90 1080 50 C1440 10 1800 90 2160 50 C2520 10 2880 90 2880 50 L2880 100 L0 100 Z" fill="rgba(14,110,170,0.55)" />
+        <svg viewBox="0 0 2880 90" preserveAspectRatio="none" className="w-full" style={{ height: "90px" }}>
+          <path d="M0 45 C360 22 720 68 1080 45 C1440 22 1800 68 2160 45 C2520 22 2880 68 2880 45 L2880 90 L0 90 Z" fill="rgba(14,110,170,0.55)" />
         </svg>
       </div>
 
       {/* Layer 4 — teal surface */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-1 8s linear infinite reverse" }}>
-        <svg viewBox="0 0 2880 70" preserveAspectRatio="none" className="w-full" style={{ height: "70px" }}>
-          <path d="M0 35 C180 8 360 62 540 35 C720 8 900 62 1080 35 C1260 8 1440 62 1620 35 C1800 8 1980 62 2160 35 C2340 8 2520 62 2700 35 C2790 22 2835 48 2880 35 L2880 70 L0 70 Z" fill="rgba(20,180,230,0.3)" />
+        <svg viewBox="0 0 2880 60" preserveAspectRatio="none" className="w-full" style={{ height: "60px" }}>
+          <path d="M0 30 C360 12 720 48 1080 30 C1440 12 1800 48 2160 30 C2520 12 2880 48 2880 30 L2880 60 L0 60 Z" fill="rgba(20,180,230,0.3)" />
         </svg>
       </div>
 
       {/* Layer 5 — light cyan shimmer */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-2 6s linear infinite" }}>
-        <svg viewBox="0 0 2880 50" preserveAspectRatio="none" className="w-full" style={{ height: "48px" }}>
-          <path d="M0 25 C240 5 480 45 720 25 C960 5 1200 45 1440 25 C1680 5 1920 45 2160 25 C2400 5 2640 45 2880 25 L2880 50 L0 50 Z" fill="rgba(34,211,238,0.2)" />
+        <svg viewBox="0 0 2880 45" preserveAspectRatio="none" className="w-full" style={{ height: "45px" }}>
+          <path d="M0 22 C360 8 720 36 1080 22 C1440 8 1800 36 2160 22 C2520 8 2880 36 2880 22 L2880 45 L0 45 Z" fill="rgba(34,211,238,0.2)" />
         </svg>
       </div>
 
       {/* Layer 6 — foam crest */}
       <div className="absolute bottom-0 left-0" style={{ width: "200%", animation: "wave-3 5s linear infinite reverse" }}>
-        <svg viewBox="0 0 2880 32" preserveAspectRatio="none" className="w-full" style={{ height: "30px" }}>
-          <path d="M0 16 C180 4 360 28 540 16 C720 4 900 28 1080 16 C1260 4 1440 28 1620 16 C1800 4 1980 28 2160 16 C2340 4 2520 28 2700 16 C2790 10 2835 22 2880 16 L2880 32 L0 32 Z" fill="rgba(186,230,253,0.15)" />
+        <svg viewBox="0 0 2880 30" preserveAspectRatio="none" className="w-full" style={{ height: "30px" }}>
+          <path d="M0 15 C360 5 720 25 1080 15 C1440 5 1800 25 2160 15 C2520 5 2880 25 2880 15 L2880 30 L0 30 Z" fill="rgba(186,230,253,0.15)" />
         </svg>
       </div>
     </div>
@@ -382,8 +382,8 @@ function FeedCard({ entry, distKm: dist }: { entry: FeedEntry; distKm?: number }
                 className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border"
                 style={{
                   color: meta.color,
-                  borderColor: `${meta.color}30`,
-                  backgroundColor: `${meta.color}10`,
+                  borderColor: `${meta.color}20`,
+                  backgroundColor: `${meta.color}06`,
                 }}
               >
                 <span>{meta.emoji}</span>
