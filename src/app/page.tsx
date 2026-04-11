@@ -8,6 +8,7 @@ import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { AppleEmoji } from "@/components/WaterRatingPicker";
 import { Droplet } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FishCanvas } from "@/components/FishCanvas";
 
 function WaterQuestionMark() {
   return (
@@ -77,8 +78,8 @@ function AnimatedWaterDrop() {
         @keyframes drop-fill  { from{transform:translateX(0)} to{transform:translateX(-50%)} }
       `}</style>
       <svg
-        width="76"
-        height="100"
+        width="110"
+        height="145"
         viewBox="0 0 76 100"
         fill="none"
         style={{ animation: "drop-float 3.2s ease-in-out infinite" }}
@@ -520,6 +521,7 @@ export default function HomePage() {
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-14 min-h-screen flex flex-col justify-center z-[1]">
+        <FishCanvas />
         {/* Expanding ripple rings */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {[0, 1, 2, 3, 4].map((i) => (
