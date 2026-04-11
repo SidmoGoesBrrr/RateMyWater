@@ -205,22 +205,24 @@ export function GoogleMapView({
         {/* Water body pins */}
         {mode === "full" && waters.map((w) => {
           if (!w.coordinates) return null;
+          const isActive = selected?._id === w._id;
           return (
             <OverlayView
               key={w._id}
               position={w.coordinates}
-              mapPaneName={OverlayView.FLOAT_PANE}
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               getPixelPositionOffset={getPinOffset}
             >
-              <WaterPin
-                water={w}
-                isSelected={selected?._id === w._id}
-                onClick={() => {
-                  setSelected(w);
-                  setInfoPos(w.coordinates!);
-                  mapRef.current?.panTo(w.coordinates!);
-                }}
-              />
+              <div style={{ zIndex: isActive ? 1000 : (selected ? -1 : 1), position: "relative" }}>
+                <WaterPin
+                  water={w}
+                  isSelected={isActive}
+                  onClick={() => {
+                    setSelected(w);
+                    setInfoPos(w.coordinates!);
+                  }}
+                />
+              </div>
             </OverlayView>
           );
         })}
@@ -261,7 +263,7 @@ export function GoogleMapView({
           <InfoWindow
             position={infoPos}
             onCloseClick={() => setSelected(null)}
-            options={{ pixelOffset: new google.maps.Size(0, -60), disableAutoPan: false }}
+            options={{ pixelOffset: new google.maps.Size(0, -60), disableAutoPan: true }}
           >
             <WaterInfoCard water={selected} onClose={() => setSelected(null)} />
           </InfoWindow>
