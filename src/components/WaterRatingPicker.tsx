@@ -20,6 +20,77 @@ const PARTICLE_CONFIG: Record<WaterRating, { count: number; colors: string[] }> 
   biohazard_speedrun: { count: 12, colors: ["#ef4444", "#dc2626", "#fca5a5", "#22c55e"] },
 };
 
+const APPLE_EMOJI_BASE =
+  "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.0.1/img/apple/64";
+
+/** Renders an emoji as an iOS-style image. Falls back to the text emoji on load error. */
+export function AppleEmoji({
+  hex,
+  fallback,
+  size = 24,
+  className,
+}: {
+  hex: string;
+  fallback: string;
+  size?: number;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span className={className} style={{ fontSize: size }}>
+        {fallback}
+      </span>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`${APPLE_EMOJI_BASE}/${hex}.png`}
+      alt={fallback}
+      width={size}
+      height={size}
+      className={cn("select-none", className)}
+      onError={() => setFailed(true)}
+      draggable={false}
+    />
+  );
+}
+
+/** Styled iOS app-icon container around an Apple emoji. */
+function RatingIcon({
+  hex,
+  fallback,
+  color,
+  size = 40,
+  isSelected,
+  isHovered,
+}: {
+  hex: string;
+  fallback: string;
+  color: string;
+  size?: number;
+  isSelected?: boolean;
+  isHovered?: boolean;
+}) {
+  return (
+    <motion.div
+      className="flex-shrink-0 rounded-2xl flex items-center justify-center"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: `${color}${isSelected ? "28" : isHovered ? "18" : "12"}`,
+        border: `1.5px solid ${color}${isSelected ? "60" : isHovered ? "40" : "25"}`,
+        boxShadow: isSelected ? `0 0 14px ${color}40` : undefined,
+      }}
+      animate={{ scale: isSelected ? [1, 1.12, 1] : 1 }}
+      transition={{ duration: 0.35 }}
+    >
+      <AppleEmoji hex={hex} fallback={fallback} size={Math.round(size * 0.55)} />
+    </motion.div>
+  );
+}
+
 function Particles({ rating }: { rating: WaterRating }) {
   const cfg = PARTICLE_CONFIG[rating];
   return (
@@ -68,39 +139,44 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
     setTimeout(() => setBurst(null), 800);
   };
 
-  const active = hovered ?? selected;
+  // Only show the description for the hovered or selected item. The container
+  // has a reserved min-h so AnimatePresence transitions never cause a layout
+  // reflow that would move buttons under the cursor and trigger re-hover.
+  const preview = hovered ?? selected;
 
   return (
     <div className="w-full space-y-3">
-      {/* Active rating description */}
-      <AnimatePresence mode="wait">
-        {active && (
-          <motion.div
-            key={active}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
-            className="text-center mb-4"
-          >
-            <span
-              className="text-4xl"
-              style={{ filter: "drop-shadow(0 0 12px currentColor)" }}
+      {/* Preview — fixed height so layout never reflows on hover change */}
+      <div className="min-h-[72px] mb-1">
+        <AnimatePresence mode="wait">
+          {preview && (
+            <motion.div
+              key={preview}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border"
+              style={{
+                borderColor: `${RATING_META[preview].color}30`,
+                backgroundColor: `${RATING_META[preview].color}0c`,
+              }}
             >
-              {RATING_META[active].emoji}
-            </span>
-            <p
-              className="mt-1 text-sm font-semibold"
-              style={{ color: RATING_META[active].color }}
-            >
-              {RATING_META[active].description}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <AppleEmoji
+                hex={RATING_META[preview].emojiHex}
+                fallback={RATING_META[preview].emoji}
+                size={32}
+              />
+              <p className="text-sm font-semibold leading-tight" style={{ color: RATING_META[preview].color }}>
+                {RATING_META[preview].description}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Rating buttons */}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-2">
         {RATINGS.map((rating, idx) => {
           const meta = RATING_META[rating];
           const isSelected = selected === rating;
@@ -116,12 +192,10 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
               onMouseEnter={() => setHovered(rating)}
               onMouseLeave={() => setHovered(null)}
               className={cn(
-                "relative w-full rounded-2xl px-5 py-3.5 text-left transition-all duration-200",
+                // No scale transform — keeps the hit target stable so edge-hover never flickers.
+                "relative w-full rounded-2xl px-4 py-3 text-left transition-colors duration-150",
                 "border overflow-hidden group",
-                isSelected
-                  ? "border-opacity-60 shadow-lg"
-                  : "border-white/10 hover:border-white/20",
-                isSelected && "scale-[1.02]"
+                isSelected ? "border-opacity-60 shadow-lg" : "border-white/10 hover:border-white/20",
               )}
               style={{
                 borderColor: isSelected || isHovered ? `${meta.color}50` : undefined,
@@ -140,40 +214,36 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
                 {burst === rating && <Particles rating={rating} />}
               </AnimatePresence>
 
-              {/* Animated left bar */}
+              {/* Selected left bar */}
               <motion.div
                 className="absolute left-0 top-0 h-full w-1 rounded-l-2xl"
                 style={{ backgroundColor: meta.color }}
                 initial={{ scaleY: 0 }}
                 animate={{ scaleY: isSelected ? 1 : 0 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               />
 
-              <div className="flex items-center gap-3.5 relative z-10">
-                {/* Emoji */}
-                <motion.span
-                  className="text-2xl flex-shrink-0 select-none"
-                  animate={{
-                    scale: isSelected ? [1, 1.3, 1] : 1,
-                    rotate: rating === "biohazard_speedrun" && isSelected ? [0, -10, 10, 0] : 0,
-                  }}
-                  transition={{ duration: 0.4 }}
-                >
-                  {meta.emoji}
-                </motion.span>
+              <div className="flex items-center gap-3 relative z-10">
+                {/* iOS app-icon style emoji */}
+                <RatingIcon
+                  hex={meta.emojiHex}
+                  fallback={meta.emoji}
+                  color={meta.color}
+                  size={38}
+                  isSelected={isSelected}
+                  isHovered={isHovered}
+                />
 
-                {/* Label + score */}
+                {/* Label + score dots */}
                 <div className="flex-1 min-w-0">
                   <p
                     className={cn(
-                      "font-semibold text-sm leading-tight transition-colors duration-200",
-                      isSelected ? "text-white" : "text-zinc-300 group-hover:text-white"
+                      "font-semibold text-sm leading-tight transition-colors duration-150",
+                      isSelected ? "text-white" : "text-zinc-300 group-hover:text-white",
                     )}
                   >
                     {meta.label}
                   </p>
-
-                  {/* Score dots */}
                   <div className="flex gap-1 mt-1.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <motion.div
@@ -205,7 +275,10 @@ export function WaterRatingPicker({ selected, onSelect }: WaterRatingPickerProps
                       exit={{ scale: 0, rotate: 90 }}
                       transition={{ type: "spring", stiffness: 400, damping: 20 }}
                       className="flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: `${meta.color}30`, border: `1.5px solid ${meta.color}` }}
+                      style={{
+                        backgroundColor: `${meta.color}30`,
+                        border: `1.5px solid ${meta.color}`,
+                      }}
                     >
                       <svg
                         className="h-3 w-3"
@@ -240,7 +313,7 @@ export function RatingBadge({ rating }: { rating: WaterRating }) {
         backgroundColor: `${meta.color}15`,
       }}
     >
-      <span>{meta.emoji}</span>
+      <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={13} />
       <span>{meta.label}</span>
     </span>
   );
@@ -269,8 +342,9 @@ export function ScoreDisplay({ score, totalRatings }: { score: number; totalRati
       >
         {score.toFixed(1)}
       </motion.div>
-      <div className="text-xs text-zinc-500 mt-0.5">{totalRatings} rating{totalRatings !== 1 ? "s" : ""}</div>
-      {/* Score bar */}
+      <div className="text-xs text-zinc-500 mt-0.5">
+        {totalRatings} rating{totalRatings !== 1 ? "s" : ""}
+      </div>
       <div className="mt-2 h-1.5 w-20 rounded-full bg-white/10 overflow-hidden">
         <motion.div
           className="h-full rounded-full"

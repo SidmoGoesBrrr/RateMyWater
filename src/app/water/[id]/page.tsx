@@ -8,7 +8,7 @@ import {
   Trophy, Upload, MapPin, Calendar, ChevronLeft,
   MessageSquare, CheckCircle, Loader2, Users
 } from "lucide-react";
-import { WaterRatingPicker, RatingBadge, ScoreDisplay } from "@/components/WaterRatingPicker";
+import { WaterRatingPicker, RatingBadge, ScoreDisplay, AppleEmoji } from "@/components/WaterRatingPicker";
 import { RATING_META, type WaterRating } from "@/lib/water-types";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +58,7 @@ function RatingDistribution({ ratings }: { ratings: RatingEntry[] }) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.06, type: "spring", stiffness: 300 }}
           >
-            <span className="text-lg shrink-0 w-7 text-center">{meta.emoji}</span>
+            <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={20} className="shrink-0" />
             <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
@@ -96,7 +96,7 @@ function RatingCommentCard({ entry, index }: { entry: RatingEntry; index: number
           style={{ borderColor: `${meta.color}30`, backgroundColor: `${meta.color}15` }}
           whileHover={{ scale: 1.15, rotate: 5 }}
         >
-          {meta.emoji}
+          <AppleEmoji hex={meta.emojiHex} fallback={meta.emoji} size={18} />
         </motion.div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
