@@ -48,60 +48,65 @@ function getScoreColor(score: number) {
   return "#ef4444";
 }
 
+const PIN_W = 48;
+const PIN_H = 64;
+const PIN_OFFSET = { x: -(PIN_W / 2), y: -PIN_H };
+
 function WaterPin({ water, onClick, isSelected }: { water: MapWaterEntry; onClick: () => void; isSelected: boolean }) {
   const meta = water.topRating ? RATING_META[water.topRating] : null;
   const color = water.totalRatings > 0 ? getScoreColor(water.averageScore) : "#64748b";
 
   return (
-    <motion.button
-      onClick={onClick}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: isSelected ? 1.15 : 1, opacity: 1 }}
-      whileHover={{ scale: 1.1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-      className="relative flex flex-col items-center cursor-pointer"
-      style={{ transform: "translate(-50%, -100%)" }}
-    >
-      {/* Pin body */}
-      <div
-        className="h-9 w-9 rounded-full border-2 flex items-center justify-center shadow-lg text-base relative"
-        style={{
-          backgroundColor: `${color}20`,
-          borderColor: color,
-          boxShadow: isSelected ? `0 0 20px ${color}60, 0 4px 12px rgba(0,0,0,0.5)` : `0 4px 12px rgba(0,0,0,0.4)`,
-        }}
+    <div style={{ width: PIN_W, height: PIN_H }} className="relative">
+      <button
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer"
       >
-        {meta ? meta.emoji : "💧"}
-        {/* Pulse ring when selected */}
-        {isSelected && (
-          <motion.div
-            className="absolute inset-0 rounded-full"
-            style={{ border: `2px solid ${color}` }}
-            animate={{ scale: [1, 1.8, 1], opacity: [0.8, 0, 0.8] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        )}
-      </div>
-      {/* Score badge */}
-      {water.totalRatings > 0 && (
+        {/* Pin body */}
         <div
-          className="mt-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none shadow"
-          style={{ backgroundColor: color, color: "#000" }}
+          className="h-9 w-9 rounded-full border-2 flex items-center justify-center shadow-lg text-base relative transition-transform duration-150"
+          style={{
+            backgroundColor: `${color}20`,
+            borderColor: color,
+            boxShadow: isSelected ? `0 0 20px ${color}60, 0 4px 12px rgba(0,0,0,0.5)` : `0 4px 12px rgba(0,0,0,0.4)`,
+            transform: isSelected ? "scale(1.15)" : undefined,
+          }}
         >
-          {water.averageScore.toFixed(1)}
+          {meta ? meta.emoji : "💧"}
+          {isSelected && (
+            <motion.div
+              className="absolute inset-0 rounded-full"
+              style={{ border: `2px solid ${color}` }}
+              animate={{ scale: [1, 1.8, 1], opacity: [0.8, 0, 0.8] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          )}
         </div>
-      )}
-      {/* Pointer */}
-      <div
-        className="w-0 h-0 mt-[-2px]"
-        style={{
-          borderLeft: "5px solid transparent",
-          borderRight: "5px solid transparent",
-          borderTop: `6px solid ${color}`,
-        }}
-      />
-    </motion.button>
+        {/* Score badge */}
+        {water.totalRatings > 0 && (
+          <div
+            className="mt-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black leading-none shadow"
+            style={{ backgroundColor: color, color: "#000" }}
+          >
+            {water.averageScore.toFixed(1)}
+          </div>
+        )}
+        {/* Pointer */}
+        <div
+          className="w-0 h-0 mt-[-2px]"
+          style={{
+            borderLeft: "5px solid transparent",
+            borderRight: "5px solid transparent",
+            borderTop: `6px solid ${color}`,
+          }}
+        />
+      </button>
+    </div>
   );
+}
+
+function getPinOffset() {
+  return PIN_OFFSET;
 }
 
 interface Props {
@@ -204,7 +209,8 @@ export function GoogleMapView({
             <OverlayView
               key={w._id}
               position={w.coordinates}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              mapPaneName={OverlayView.FLOAT_PANE}
+              getPixelPositionOffset={getPinOffset}
             >
               <WaterPin
                 water={w}
@@ -224,10 +230,10 @@ export function GoogleMapView({
           <OverlayView
             position={miniMarker}
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            getPixelPositionOffset={getPinOffset}
           >
             <motion.div
               className="flex flex-col items-center"
-              style={{ transform: "translate(-50%, -100%)" }}
               drag
               onDragEnd={(_, info) => {
                 if (!mapRef.current || !onMiniMarkerChange) return;
